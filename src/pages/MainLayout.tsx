@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FileText, Settings2, LogOut } from 'lucide-react';
+import { SettingsModal } from '../components/SettingsModal';
 import './MainLayout.css';
 
 export const MainLayout: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    
     // Using React Router state to pass the path for now
     const projectPath = location.state?.projectPath || '未選択';
 
@@ -27,7 +30,7 @@ export const MainLayout: React.FC = () => {
                             </button>
                         </li>
                         <li>
-                            <button className="nav-item">
+                            <button className="nav-item" onClick={() => setIsSettingsOpen(true)}>
                                 <Settings2 size={18} />
                                 <span>設定</span>
                             </button>
@@ -52,6 +55,8 @@ export const MainLayout: React.FC = () => {
                     </div>
                 </div>
             </main>
+
+            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         </div>
     );
 };

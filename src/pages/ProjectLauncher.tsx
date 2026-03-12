@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { open } from '@tauri-apps/plugin-dialog';
-import { FolderOpen } from 'lucide-react';
+import { FolderOpen, Settings2 } from 'lucide-react';
+import { SettingsModal } from '../components/SettingsModal';
 import './ProjectLauncher.css';
 
 export const ProjectLauncher: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleOpenFolder = async () => {
     try {
@@ -25,6 +27,12 @@ export const ProjectLauncher: React.FC = () => {
 
   return (
     <div className="project-launcher">
+      <div className="launcher-header">
+        <button className="settings-toggle" onClick={() => setIsSettingsOpen(true)}>
+          <Settings2 size={24} />
+        </button>
+      </div>
+
       <div className="launcher-content">
         <h1>novelaid-editor-next</h1>
         <p className="subtitle">作業フォルダー(プロジェクト)を選択してください</p>
@@ -38,6 +46,8 @@ export const ProjectLauncher: React.FC = () => {
         
         {error && <p className="error-message">{error}</p>}
       </div>
+
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 };

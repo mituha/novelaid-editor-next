@@ -1,10 +1,35 @@
 .project-launcher {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
   background-color: var(--bg-color);
   color: var(--text-color);
+  position: relative;
+}
+
+.launcher-header {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
+.settings-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  display: flex;
+  transition: all 0.2s;
+}
+
+.settings-toggle:hover {
+  background-color: var(--bg-surface);
+  color: var(--text-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .launcher-content {

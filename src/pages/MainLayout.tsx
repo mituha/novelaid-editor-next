@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FileText, Settings2, LogOut } from 'lucide-react';
+import { Settings2, LogOut } from 'lucide-react';
 import { SettingsModal } from '../components/SettingsModal';
+import { FileExplorer } from '../components/FileExplorer';
 import './MainLayout.css';
 
 export const MainLayout: React.FC = () => {
@@ -21,23 +22,16 @@ export const MainLayout: React.FC = () => {
                         {projectPath}
                     </div>
                 </div>
-                <nav className="sidebar-nav">
-                    <ul>
-                        <li>
-                            <button className="nav-item active">
-                                <FileText size={18} />
-                                <span>エディター</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button className="nav-item" onClick={() => setIsSettingsOpen(true)}>
-                                <Settings2 size={18} />
-                                <span>設定</span>
-                            </button>
-                        </li>
-                    </ul>
-                </nav>
+                
+                <div className="sidebar-content">
+                    <FileExplorer projectPath={projectPath} />
+                </div>
+
                 <div className="sidebar-footer">
+                    <button className="nav-item" onClick={() => setIsSettingsOpen(true)}>
+                        <Settings2 size={18} />
+                        <span>設定</span>
+                    </button>
                     <button onClick={() => navigate('/')} className="nav-item return-btn">
                         <LogOut size={18} />
                         <span>ランチャーに戻る</span>

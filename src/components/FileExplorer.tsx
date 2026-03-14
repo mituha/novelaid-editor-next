@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { readDir, DirEntry } from '@tauri-apps/plugin-fs';
+import { readDir } from '@tauri-apps/plugin-fs';
 import { Folder, File, ChevronRight, ChevronDown } from 'lucide-react';
+import { useDocument } from '../contexts/DocumentContext';
 import './FileExplorer.css';
 
 interface FileExplorerProps {
@@ -19,6 +20,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
     const [files, setFiles] = useState<FileNode[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { openFile, activeFilePath } = useDocument();
 
     const loadFiles = async (path: string): Promise<FileNode[]> => {
         try {
@@ -90,9 +92,9 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
         return (
             <div key={node.path}>
                 <div 
-                    className={`file-node ${isDirectory ? 'directory' : 'file'}`}
+                    className={`file-node ${isDirectory ? 'directory' : 'file'} ${activeFilePath === node.path ? 'active' : ''}`}
                     style={{ paddingLeft: `${depth * 12 + 8}px` }}
-                    onClick={() => isDirectory && toggleFolder(node)}
+                    onClick={() => isDirectory ? toggleFolder(node) : openFile(node.path)}
                 >
                     {Icon && <Icon size={14} className="folder-chevron" />}
                     {!Icon && <div className="chevron-spacer" />}

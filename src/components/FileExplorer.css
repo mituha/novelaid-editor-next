@@ -38,9 +38,17 @@
     background-color: var(--bg-hover);
 }
 
+.file-node.file:hover {
+    background-color: var(--accent-transparent);
+}
+
 .file-node.active {
-    background-color: var(--bg-active);
-    color: var(--accent-color);
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.file-node.active .file-icon {
+    color: white;
 }
 
 .folder-chevron {

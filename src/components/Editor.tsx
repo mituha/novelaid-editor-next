@@ -7,6 +7,12 @@ import './Editor.css';
 export const Editor: React.FC = () => {
     const { activeFilePath, content, setContent, saveFile } = useDocument();
     const { theme } = useTheme();
+    const saveFileRef = React.useRef(saveFile);
+
+    // Update ref when saveFile changes
+    React.useEffect(() => {
+        saveFileRef.current = saveFile;
+    }, [saveFile]);
 
     const handleEditorChange = (value: string | undefined) => {
         if (value !== undefined) {
@@ -17,7 +23,7 @@ export const Editor: React.FC = () => {
     const handleEditorMount: OnMount = (editor, monaco) => {
         // Add save command (Ctrl+S)
         editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-            saveFile();
+            saveFileRef.current();
         });
     };
 

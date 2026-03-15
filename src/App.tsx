@@ -1,4 +1,4 @@
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import { ProjectLauncher } from './pages/ProjectLauncher';
 import { MainLayout } from './pages/MainLayout';
 import './App.css';

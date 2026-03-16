@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
+import { useApp } from './AppContext';
+
 export type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
@@ -10,19 +12,14 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = 'novelaid-editor-theme';
-
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [theme, setThemeState] = useState<Theme>(() => {
-        const saved = localStorage.getItem(THEME_STORAGE_KEY);
-        return (saved as Theme) || 'system';
-    });
+    const { settings, updateSettings } = useApp();
+    const theme = settings.theme;
 
     const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('dark');
 
     const setTheme = (newTheme: Theme) => {
-        setThemeState(newTheme);
-        localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+        updateSettings({ theme: newTheme });
     };
 
     useEffect(() => {

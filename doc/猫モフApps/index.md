@@ -11,4 +11,14 @@
 + [02. プロジェクト選択](./02_プロジェクト選択.md)
 
 
+# note
 
+* [00. はじめに](https://note.com/mituha/n/n9e81fb474e5c)
+* [01. 最初の一歩](https://note.com/mituha/n/n8a55b9a4a3a4)
+* [02. プロジェクト選択](./02_プロジェクト選択.md)
+
+# リポジトリ
+
+* [novelaid-editor](https://github.com/mituha/novelaid-editor)
+* [novelaid-editor-clone](https://github.com/mituha/novelaid-editor-clone)
+* [novelaid-editor-next](https://github.com/mituha/novelaid-editor-next)

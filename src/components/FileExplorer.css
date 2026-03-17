@@ -65,6 +65,20 @@
     opacity: 0.8;
 }
 
+/* Document Type Colors */
+.type-novel .file-icon { color: #4caf50; }        /* Green */
+.type-markdown .file-icon { color: #2196f3; }     /* Blue */
+.type-image .file-icon { color: #ff9800; }        /* Orange */
+.type-chat .file-icon { color: #9c27b0; }         /* Purple */
+.type-css .file-icon { color: #f44336; }          /* Red */
+.type-git-diff .file-icon { color: #607d8b; }     /* Blue Grey */
+.type-browser .file-icon { color: #00bcd4; }      /* Cyan */
+.type-unknown .file-icon { color: var(--text-muted); }
+
+.file-node.active .file-icon {
+    color: white !important;
+}
+
 .file-name {
     flex: 1;
     overflow: hidden;

@@ -4,6 +4,9 @@ import { Folder, File, ChevronRight, ChevronDown } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
 import './FileExplorer.css';
 
+import { DocumentType } from '../types/document';
+import { getDocumentTypeByExtension, getFolderDocumentType } from '../utils/documentType';
+
 interface FileExplorerProps {
     projectPath: string;
 }
@@ -14,6 +17,7 @@ interface FileNode {
     isDirectory: boolean;
     isOpen?: boolean;
     children?: FileNode[];
+    documentType: DocumentType;
 }
 
 export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
@@ -22,16 +26,24 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
     const [error, setError] = useState<string | null>(null);
     const { openFile, activeFilePath } = useDocument();
 
-    const loadFiles = async (path: string): Promise<FileNode[]> => {
+    const loadFiles = async (path: string, parentType: DocumentType = 'novel'): Promise<FileNode[]> => {
         try {
             const entries = await readDir(path);
-            const nodes: FileNode[] = entries.map(entry => ({
-                name: entry.name || '',
-                path: `${path}/${entry.name}`, // In v2, we might need to join path manually or use more robust way
-                isDirectory: entry.isDirectory,
-                isOpen: false,
-                children: entry.isDirectory ? [] : undefined
-            }));
+            const nodes: FileNode[] = entries.map(entry => {
+                const isDirectory = entry.isDirectory;
+                const documentType = isDirectory 
+                    ? getFolderDocumentType(entry.name || '', parentType)
+                    : getDocumentTypeByExtension(entry.name || '');
+
+                return {
+                    name: entry.name || '',
+                    path: `${path}/${entry.name}`,
+                    isDirectory: entry.isDirectory,
+                    isOpen: false,
+                    children: entry.isDirectory ? [] : undefined,
+                    documentType
+                };
+            });
             
             // Sort: directories first, then files alphabetically
             return nodes.sort((a, b) => {
@@ -65,7 +77,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
                     let children = n.children;
                     if (nextOpenState && (!children || children.length === 0)) {
                         try {
-                            const newChildren = await loadFiles(n.path);
+                            const newChildren = await loadFiles(n.path, n.documentType);
                             children = newChildren;
                         } catch (e) {
                             console.error("Failed to load subfolder", e);
@@ -87,18 +99,24 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
     const renderNode = (node: FileNode, depth = 0) => {
         const isDirectory = node.isDirectory;
         const Icon = isDirectory ? (node.isOpen ? ChevronDown : ChevronRight) : null;
-        const FileIcon = isDirectory ? Folder : File;
+        
+        let FileIcon = isDirectory ? Folder : File;
+        if (!isDirectory) {
+            if (node.documentType === 'image') FileIcon = File; // Images could have specific icons later
+            else if (node.documentType === 'markdown') FileIcon = File;
+            // Add more specific icons if available in lucide-react
+        }
 
         return (
             <div key={node.path}>
                 <div 
-                    className={`file-node ${isDirectory ? 'directory' : 'file'} ${activeFilePath === node.path ? 'active' : ''}`}
+                    className={`file-node ${isDirectory ? 'directory' : 'file'} type-${node.documentType} ${activeFilePath === node.path ? 'active' : ''}`}
                     style={{ paddingLeft: `${depth * 12 + 8}px` }}
                     onClick={() => isDirectory ? toggleFolder(node) : openFile(node.path)}
                 >
                     {Icon && <Icon size={14} className="folder-chevron" />}
                     {!Icon && <div className="chevron-spacer" />}
-                    <FileIcon size={16} className="file-icon" />
+                    <FileIcon size={16} className={`file-icon type-${node.documentType}`} />
                     <span className="file-name">{node.name}</span>
                 </div>
                 {isDirectory && node.isOpen && node.children && (

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { readDir } from '@tauri-apps/plugin-fs';
-import { Folder, File, ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronRight, ChevronDown } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
 import './FileExplorer.css';
 
 import { DocumentType } from '../types/document';
 import { getDocumentTypeByExtension, getFolderDocumentType } from '../utils/documentType';
+import { DocumentIcon } from './DocumentIcon';
 
 interface FileExplorerProps {
     projectPath: string;
@@ -96,16 +97,10 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
         setFiles(newFiles);
     };
 
+
     const renderNode = (node: FileNode, depth = 0) => {
         const isDirectory = node.isDirectory;
-        const Icon = isDirectory ? (node.isOpen ? ChevronDown : ChevronRight) : null;
-        
-        let FileIcon = isDirectory ? Folder : File;
-        if (!isDirectory) {
-            if (node.documentType === 'image') FileIcon = File; // Images could have specific icons later
-            else if (node.documentType === 'markdown') FileIcon = File;
-            // Add more specific icons if available in lucide-react
-        }
+        const ChevronIcon = isDirectory ? (node.isOpen ? ChevronDown : ChevronRight) : null;
 
         return (
             <div key={node.path}>
@@ -114,9 +109,15 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
                     style={{ paddingLeft: `${depth * 12 + 8}px` }}
                     onClick={() => isDirectory ? toggleFolder(node) : openFile(node.path)}
                 >
-                    {Icon && <Icon size={14} className="folder-chevron" />}
-                    {!Icon && <div className="chevron-spacer" />}
-                    <FileIcon size={16} className={`file-icon type-${node.documentType}`} />
+                    {ChevronIcon && <ChevronIcon size={14} className="folder-chevron" />}
+                    {!ChevronIcon && <div className="chevron-spacer" />}
+                    <DocumentIcon 
+                        type={node.documentType} 
+                        isFolder={isDirectory} 
+                        isOpen={node.isOpen} 
+                        size={16} 
+                        className={`file-icon type-${node.documentType}`} 
+                    />
                     <span className="file-name">{node.name}</span>
                 </div>
                 {isDirectory && node.isOpen && node.children && (

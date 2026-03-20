@@ -42,26 +42,32 @@ export class ConfigService {
      * Save a configuration file
      */
     private static async saveFile(dirPath: string, fileName: string, data: any): Promise<void> {
-        if (!await exists(dirPath)) {
-            await mkdir(dirPath, { recursive: true });
+        try {
+            if (!await exists(dirPath)) {
+                await mkdir(dirPath, { recursive: true });
+            }
+            const filePath = await join(dirPath, fileName);
+            await writeTextFile(filePath, JSON.stringify(data, null, 2));
+        } catch (e) {
+            console.warn(`Failed to save ${fileName} to ${dirPath}:`, e);
+            // Don't throw, just log warning
         }
-        const filePath = await join(dirPath, fileName);
-        await writeTextFile(filePath, JSON.stringify(data, null, 2));
     }
 
     /**
      * Load a configuration file
      */
     private static async loadFile<T>(dirPath: string, fileName: string, defaultValue: T): Promise<T> {
-        const filePath = await join(dirPath, fileName);
-        if (!await exists(filePath)) {
-            return defaultValue;
-        }
         try {
+            const filePath = await join(dirPath, fileName);
+            if (!await exists(filePath)) {
+                return defaultValue;
+            }
             const content = await readTextFile(filePath);
             return JSON.parse(content) as T;
         } catch (e) {
-            console.error(`Failed to load ${fileName}:`, e);
+            // This handles "forbidden path" or missing file edge cases in Tauri 2.0
+            console.warn(`Failed to load ${fileName} from ${dirPath}, using default values.`, e);
             return defaultValue;
         }
     }

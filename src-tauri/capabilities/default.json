@@ -17,6 +17,7 @@
     "fs:allow-appconfig-write-recursive",
     "fs:allow-read-dir",
     "fs:allow-read-file",
-    "fs:allow-write-file"
+    "fs:allow-write-file",
+    "novelaid-fs:default"
   ]
 }

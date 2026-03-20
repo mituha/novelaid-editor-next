@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { readDir } from '@tauri-apps/plugin-fs';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
 import './FileExplorer.css';
 
 import { DocumentType } from '../types/document';
-import { getDocumentTypeByExtension, getFolderDocumentType } from '../utils/documentType';
 import { DocumentIcon } from './DocumentIcon';
 
 interface FileExplorerProps {
@@ -30,11 +30,13 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
     const loadFiles = async (path: string, parentType: DocumentType = 'novel'): Promise<FileNode[]> => {
         try {
             const entries = await readDir(path);
-            const nodes: FileNode[] = entries.map(entry => {
+            const nodes: FileNode[] = await Promise.all(entries.map(async entry => {
                 const isDirectory = entry.isDirectory;
-                const documentType = isDirectory 
-                    ? getFolderDocumentType(entry.name || '', parentType)
-                    : getDocumentTypeByExtension(entry.name || '');
+                const documentType = await invoke<DocumentType>('get_document_type', { 
+                    path: entry.name || '', 
+                    isDirectory,
+                    parentType: parentType 
+                });
 
                 return {
                     name: entry.name || '',
@@ -44,7 +46,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
                     children: entry.isDirectory ? [] : undefined,
                     documentType
                 };
-            });
+            }));
             
             // Sort: directories first, then files alphabetically
             return nodes.sort((a, b) => {
@@ -122,7 +124,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
                 </div>
                 {isDirectory && node.isOpen && node.children && (
                     <div className="folder-children">
-                        {node.children.map(child => renderNode(child, depth + 1))}
+                        {node.children.map((child: FileNode) => renderNode(child, depth + 1))}
                     </div>
                 )}
             </div>
@@ -147,7 +149,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
                 <span>ファイル</span>
             </div>
             <div className="file-explorer-content">
-                {files.map(file => renderNode(file))}
+                {files.map((file: FileNode) => renderNode(file))}
             </div>
         </div>
     );

@@ -1,5 +1,18 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum DocumentType {
+    Novel,
+    Markdown,
+    Image,
+    Chat,
+    GitDiff,
+    Browser,
+    Css,
+    Unknown,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PingRequest {
@@ -11,3 +24,4 @@ pub struct PingRequest {
 pub struct PingResponse {
   pub value: Option<String>,
 }
+

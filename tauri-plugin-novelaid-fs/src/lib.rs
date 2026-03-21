@@ -35,7 +35,10 @@ impl<R: Runtime, T: Manager<R>> crate::NovelaidFsExt<R> for T {
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
   Builder::new("novelaid-fs")
-    .invoke_handler(tauri::generate_handler![commands::ping])
+    .invoke_handler(tauri::generate_handler![
+      commands::ping,
+      commands::get_document_type
+    ])
     .setup(|app, api| {
       #[cfg(mobile)]
       let novelaid_fs = mobile::init(app, api)?;

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { ProjectConfig, ProjectSettings, ProjectSession, ProjectState } from '../types/config';
 import { ConfigService } from '../services/configService';
+import { setProjectDirectory } from '../../tauri-plugin-novelaid-fs/guest-js';
 
 interface ProjectContextType {
     projectPath: string | null;
@@ -41,15 +42,20 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, []);
 
     useEffect(() => {
-        if (projectPath) {
-            loadProjectConfig(projectPath);
-        } else {
-            // Reset to defaults when no project is open
-            setConfig({ name: '' });
-            setSettings({});
-            setSession({ lastFilePath: null, cursorPosition: null });
-            setState({ expandedFolders: [] });
-        }
+        const initProject = async () => {
+            if (projectPath) {
+                await setProjectDirectory(projectPath);
+                await loadProjectConfig(projectPath);
+            } else {
+                await setProjectDirectory(null);
+                // Reset to defaults when no project is open
+                setConfig({ name: '' });
+                setSettings({});
+                setSession({ lastFilePath: null, cursorPosition: null });
+                setState({ expandedFolders: [] });
+            }
+        };
+        initProject();
     }, [projectPath, loadProjectConfig]);
 
     const updateSettings = async (newSettings: Partial<ProjectSettings>) => {

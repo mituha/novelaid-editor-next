@@ -37,7 +37,9 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
   Builder::new("novelaid-fs")
     .invoke_handler(tauri::generate_handler![
       commands::ping,
-      commands::get_document_type
+      commands::get_document_type,
+      commands::set_project_directory,
+      commands::get_project_directory
     ])
     .setup(|app, api| {
       #[cfg(mobile)]

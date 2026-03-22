@@ -31,3 +31,13 @@ export async function getDocumentType(
   });
 }
 
+export async function setProjectDirectory(path: string | null): Promise<void> {
+  await invoke('plugin:novelaid-fs|set_project_directory', {
+    path,
+  });
+}
+
+export async function getProjectDirectory(): Promise<string | null> {
+  return await invoke<string | null>('plugin:novelaid-fs|get_project_directory');
+}
+

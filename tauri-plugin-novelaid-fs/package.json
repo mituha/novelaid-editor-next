@@ -1,7 +1,7 @@
 {
   "name": "tauri-plugin-novelaid-fs-api",
-  "version": "0.1.0",
-  "author": "You",
+  "version": "0.2.0",
+  "author": "Mizuki Mituha",
   "description": "",
   "type": "module",
   "types": "./dist-js/index.d.ts",

@@ -55,3 +55,23 @@ pub(crate) fn get_document_type(
     }
 }
 
+#[command]
+pub(crate) async fn set_project_directory<R: Runtime>(
+    app: AppHandle<R>,
+    path: Option<String>,
+) -> Result<()> {
+    app.novelaid_fs()
+        .set_project_directory(path.map(std::path::PathBuf::from));
+    Ok(())
+}
+
+#[command]
+pub(crate) async fn get_project_directory<R: Runtime>(
+    app: AppHandle<R>,
+) -> Result<Option<String>> {
+    Ok(app
+        .novelaid_fs()
+        .get_project_directory()
+        .map(|p| p.to_string_lossy().to_string()))
+}
+

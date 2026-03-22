@@ -9,7 +9,7 @@ const APP_DIR_NAME = 'novelaid-next';
 const PROJECT_DIR_NAME = '.novelaid-next';
 
 const DEFAULT_APP_CONFIG: FullAppConfiguration = {
-    config: { version: '0.1.0' },
+    config: { name: 'novelaid-editor-next', version: '0.1.0' },
     settings: { theme: 'system', language: 'ja' },
     session: { lastProjectPath: null, lastOpenedFiles: [] },
     state: { windowSize: { width: 1200, height: 800 }, sidebarWidth: 260 }

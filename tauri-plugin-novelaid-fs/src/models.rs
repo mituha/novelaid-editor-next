@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum DocumentType {
+#[derive(TS, Debug, Clone, Copy, Serialize, Deserialize)]
+#[ts(export, export_to = "../guest-js/models.ts")]
+#[serde(rename_all = "camelCase")]
+pub enum NovelaidDocumentType {
     Novel,
     Markdown,
     Image,

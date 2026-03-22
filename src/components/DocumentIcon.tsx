@@ -12,10 +12,10 @@ import {
   FolderOpen,
   LucideProps
 } from 'lucide-react';
-import { DocumentType } from 'tauri-plugin-novelaid-fs-api';
+import { NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
 
 interface DocumentIconProps extends LucideProps {
-  type: DocumentType;
+  type: NovelaidDocumentType;
   isFolder: boolean;
   isOpen?: boolean;
 }
@@ -46,7 +46,7 @@ export const DocumentIcon: React.FC<DocumentIconProps> = ({
       return <ImageIcon size={size} color="#66bb6a" {...props} />;
     case 'chat':
       return <MessageSquare size={size} color="#ffa726" {...props} />;
-    case 'git-diff':
+    case 'gitDiff':
       return <GitBranch size={size} color="#ef5350" {...props} />;
     case 'browser':
       return <Globe size={size} color="#26c6da" {...props} />;

@@ -1,15 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
+import { NovelaidDocumentType } from './models'
 
-export type DocumentType =
-  | 'novel'
-  | 'markdown'
-  | 'image'
-  | 'chat'
-  | 'git-diff'
-  | 'browser'
-  | 'css'
-  | 'unknown'
-  | 'external';
+export * from './models'
 
 export async function ping(value: string): Promise<string | null> {
   return await invoke<{ value?: string }>('plugin:novelaid-fs|ping', {
@@ -22,9 +14,9 @@ export async function ping(value: string): Promise<string | null> {
 export async function getDocumentType(
   path: string,
   isDirectory: boolean,
-  parentType?: DocumentType
-): Promise<DocumentType> {
-  return await invoke<DocumentType>('plugin:novelaid-fs|get_document_type', {
+  parentType?: NovelaidDocumentType
+): Promise<NovelaidDocumentType> {
+  return await invoke<NovelaidDocumentType>('plugin:novelaid-fs|get_document_type', {
     path,
     isDirectory,
     parentType,

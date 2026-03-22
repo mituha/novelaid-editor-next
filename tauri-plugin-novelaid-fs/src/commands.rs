@@ -16,25 +16,25 @@ pub(crate) async fn ping<R: Runtime>(
 pub(crate) fn get_document_type(
     path: String,
     is_directory: bool,
-    parent_type: Option<DocumentType>,
-) -> DocumentType {
+    parent_type: Option<NovelaidDocumentType>,
+) -> NovelaidDocumentType {
     let name = path.to_lowercase();
 
     if is_directory {
         if name.contains("小説") || name.contains("novel") {
-            return DocumentType::Novel;
+            return NovelaidDocumentType::Novel;
         }
         if name.contains("設定")
             || name.contains("プロット")
             || name.contains("wiki")
             || name.contains("markdown")
         {
-            return DocumentType::Markdown;
+            return NovelaidDocumentType::Markdown;
         }
         if name.contains("画像") || name.contains("image") {
-            return DocumentType::Image;
+            return NovelaidDocumentType::Image;
         }
-        return parent_type.unwrap_or(DocumentType::Novel);
+        return parent_type.unwrap_or(NovelaidDocumentType::Novel);
     }
 
     let ext = std::path::Path::new(&path)
@@ -44,14 +44,14 @@ pub(crate) fn get_document_type(
         .unwrap_or_default();
 
     match ext.as_str() {
-        "txt" => DocumentType::Novel,
-        "md" => DocumentType::Markdown,
+        "txt" => NovelaidDocumentType::Novel,
+        "md" => NovelaidDocumentType::Markdown,
         "png" | "jpg" | "jpeg" | "gif" | "webp" | "svg" | "bmp" | "tiff" | "ico" => {
-            DocumentType::Image
+            NovelaidDocumentType::Image
         }
-        "chat" => DocumentType::Chat,
-        "css" => DocumentType::Css,
-        _ => DocumentType::Unknown,
+        "chat" => NovelaidDocumentType::Chat,
+        "css" => NovelaidDocumentType::Css,
+        _ => NovelaidDocumentType::Unknown,
     }
 }
 

@@ -4,7 +4,7 @@ import { ChevronRight, ChevronDown } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
 import './FileExplorer.css';
 
-import { DocumentType } from 'tauri-plugin-novelaid-fs-api';
+import { NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
 import { DocumentIcon } from './DocumentIcon';
 import { getDocumentType } from 'tauri-plugin-novelaid-fs-api';
 
@@ -18,7 +18,7 @@ interface FileNode {
     isDirectory: boolean;
     isOpen?: boolean;
     children?: FileNode[];
-    documentType: DocumentType;
+    documentType: NovelaidDocumentType;
 }
 
 export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
@@ -27,7 +27,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
     const [error, setError] = useState<string | null>(null);
     const { openFile, activeFilePath } = useDocument();
 
-    const loadFiles = async (path: string, parentType: DocumentType = 'novel'): Promise<FileNode[]> => {
+    const loadFiles = async (path: string, parentType: NovelaidDocumentType = 'novel'): Promise<FileNode[]> => {
         try {
             const entries = await readDir(path);
             const nodes: FileNode[] = await Promise.all(entries.map(async entry => {
@@ -35,7 +35,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
                 const documentType = await getDocumentType(
                     entry.name || '',
                     isDirectory,
-                    parentType as any // The plugin's DocumentType might be slightly different in string literal types but they match the runtime values
+                    parentType
                 );
 
                 return {
@@ -44,7 +44,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
                     isDirectory: entry.isDirectory,
                     isOpen: false,
                     children: entry.isDirectory ? [] : undefined,
-                    documentType: documentType as DocumentType
+                    documentType: documentType
                 };
             }));
 

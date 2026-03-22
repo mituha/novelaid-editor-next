@@ -1,9 +1,9 @@
-import { DocumentType } from 'tauri-plugin-novelaid-fs-api';
+import { NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
 
 /**
  * ファイルの拡張子からドキュメントタイプを推定します。
  */
-export function getDocumentTypeByExtension(fileName: string): DocumentType {
+export function getDocumentTypeByExtension(fileName: string): NovelaidDocumentType {
   const ext = fileName.split('.').pop()?.toLowerCase();
 
   if (!ext) return 'unknown';
@@ -35,7 +35,7 @@ export function getDocumentTypeByExtension(fileName: string): DocumentType {
 /**
  * フォルダー名からドキュメントタイプを推定します。
  */
-export function getFolderDocumentType(folderName: string, parentType: DocumentType = 'novel'): DocumentType {
+export function getFolderDocumentType(folderName: string, parentType: NovelaidDocumentType = 'novel'): NovelaidDocumentType {
   const name = folderName.toLowerCase();
 
   if (name.includes('小説') || name.includes('novel')) {
@@ -55,7 +55,7 @@ export function getFolderDocumentType(folderName: string, parentType: DocumentTy
 /**
  * ドキュメントタイプに応じたデフォルトの拡張子を返します。
  */
-export function getDefaultExtensionByDocumentType(type: DocumentType): string {
+export function getDefaultExtensionByDocumentType(type: NovelaidDocumentType): string {
   switch (type) {
     case 'novel':
       return '.txt';

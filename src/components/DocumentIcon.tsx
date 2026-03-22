@@ -1,18 +1,18 @@
 import React from 'react';
-import { 
-  BookText, 
-  FileText, 
-  Image as ImageIcon, 
-  MessageSquare, 
-  GitBranch, 
-  Globe, 
-  FileCode, 
-  File, 
-  Folder, 
+import {
+  BookText,
+  FileText,
+  Image as ImageIcon,
+  MessageSquare,
+  GitBranch,
+  Globe,
+  FileCode,
+  File,
+  Folder,
   FolderOpen,
   LucideProps
 } from 'lucide-react';
-import { DocumentType } from '../types/document';
+import { DocumentType } from 'tauri-plugin-novelaid-fs-api';
 
 interface DocumentIconProps extends LucideProps {
   type: DocumentType;
@@ -23,17 +23,17 @@ interface DocumentIconProps extends LucideProps {
 /**
  * ドキュメントタイプとファイル・フォルダーの区別に応じたアイコンを表示するコンポーネントです。
  */
-export const DocumentIcon: React.FC<DocumentIconProps> = ({ 
-  type, 
-  isFolder, 
-  isOpen = false, 
-  size = 18, 
-  ...props 
+export const DocumentIcon: React.FC<DocumentIconProps> = ({
+  type,
+  isFolder,
+  isOpen = false,
+  size = 18,
+  ...props
 }) => {
   if (isFolder) {
     const folderColor = type === 'novel' ? 'var(--accent-color, #ff69b4)' : undefined;
-    return isOpen 
-      ? <FolderOpen size={size} color={folderColor} {...props} /> 
+    return isOpen
+      ? <FolderOpen size={size} color={folderColor} {...props} />
       : <Folder size={size} color={folderColor} {...props} />;
   }
 

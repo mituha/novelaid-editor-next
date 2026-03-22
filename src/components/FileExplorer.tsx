@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
 import { readDir } from '@tauri-apps/plugin-fs';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
 import './FileExplorer.css';
 
-import { DocumentType } from '../types/document';
+import { DocumentType } from 'tauri-plugin-novelaid-fs-api';
 import { DocumentIcon } from './DocumentIcon';
 import { getDocumentType } from 'tauri-plugin-novelaid-fs-api';
 
@@ -34,7 +33,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
             const nodes: FileNode[] = await Promise.all(entries.map(async entry => {
                 const isDirectory = entry.isDirectory;
                 const documentType = await getDocumentType(
-                    entry.name || '', 
+                    entry.name || '',
                     isDirectory,
                     parentType as any // The plugin's DocumentType might be slightly different in string literal types but they match the runtime values
                 );
@@ -48,7 +47,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
                     documentType: documentType as DocumentType
                 };
             }));
-            
+
             // Sort: directories first, then files alphabetically
             return nodes.sort((a, b) => {
                 if (a.isDirectory && !b.isDirectory) return -1;
@@ -107,19 +106,19 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
 
         return (
             <div key={node.path}>
-                <div 
+                <div
                     className={`file-node ${isDirectory ? 'directory' : 'file'} type-${node.documentType} ${activeFilePath === node.path ? 'active' : ''}`}
                     style={{ paddingLeft: `${depth * 12 + 8}px` }}
                     onClick={() => isDirectory ? toggleFolder(node) : openFile(node.path)}
                 >
                     {ChevronIcon && <ChevronIcon size={14} className="folder-chevron" />}
                     {!ChevronIcon && <div className="chevron-spacer" />}
-                    <DocumentIcon 
-                        type={node.documentType} 
-                        isFolder={isDirectory} 
-                        isOpen={node.isOpen} 
-                        size={16} 
-                        className={`file-icon type-${node.documentType}`} 
+                    <DocumentIcon
+                        type={node.documentType}
+                        isFolder={isDirectory}
+                        isOpen={node.isOpen}
+                        size={16}
+                        className={`file-icon type-${node.documentType}`}
                     />
                     <span className="file-name">{node.name}</span>
                 </div>

@@ -1,11 +1,11 @@
-import { DocumentType } from '../types/document';
+import { DocumentType } from 'tauri-plugin-novelaid-fs-api';
 
 /**
  * ファイルの拡張子からドキュメントタイプを推定します。
  */
 export function getDocumentTypeByExtension(fileName: string): DocumentType {
   const ext = fileName.split('.').pop()?.toLowerCase();
-  
+
   if (!ext) return 'unknown';
 
   switch (ext) {

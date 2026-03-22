@@ -1,6 +1,7 @@
 export type Theme = 'light' | 'dark' | 'system';
 
 export interface AppConfig {
+    name: string;
     version: string;
     // Semi-fixed values
 }

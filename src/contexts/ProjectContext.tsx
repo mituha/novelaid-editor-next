@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { ProjectConfig, ProjectSettings, ProjectSession, ProjectState } from '../types/config';
 import { ConfigService } from '../services/configService';
 import { setProjectDirectory } from '../../tauri-plugin-novelaid-fs/guest-js';
+import { useApp } from './AppContext';
 
 interface ProjectContextType {
     projectPath: string | null;
@@ -57,6 +58,21 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         };
         initProject();
     }, [projectPath, loadProjectConfig]);
+    
+    // Window title update
+    const { setProjectTitle } = useApp();
+    useEffect(() => {
+        const getDisplayTitle = () => {
+            if (config.name) return config.name;
+            if (projectPath) {
+                // Get the last part of the path as folder name
+                const parts = projectPath.split(/[\\/]/).filter(Boolean);
+                return parts[parts.length - 1] || null;
+            }
+            return null;
+        };
+        setProjectTitle(getDisplayTitle());
+    }, [config.name, projectPath, setProjectTitle]);
 
     const updateSettings = async (newSettings: Partial<ProjectSettings>) => {
         if (!projectPath) return;

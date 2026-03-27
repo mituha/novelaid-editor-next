@@ -82,6 +82,21 @@ Electron版では処理が`main`および`renderer`に分かれています。
 | `copy` | コピー（競合時はダイアログ表示）。 |
 | `delete` | 削除。 |
 
+### setProjectDirectory / getProjectDirectory
+
+プロジェクトディレクトリを設定します。  
+
+### getDocumentType / getDirectoryType
+
+ファイルおよびディレクトリのドキュメントタイプを取得します。  
+このメソッド自体は最終的には不要になるかもしれません。  
+
+
+
+
+
+
+
 
 ## MORE
 

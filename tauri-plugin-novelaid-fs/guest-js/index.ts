@@ -13,12 +13,18 @@ export async function ping(value: string): Promise<string | null> {
 
 export async function getDocumentType(
   path: string,
-  isDirectory: boolean,
-  parentType?: NovelaidDocumentType
 ): Promise<NovelaidDocumentType> {
   return await invoke<NovelaidDocumentType>('plugin:novelaid-fs|get_document_type', {
     path,
-    isDirectory,
+  });
+}
+
+export async function getDirectoryType(
+  path: string,
+  parentType?: NovelaidDocumentType
+): Promise<NovelaidDocumentType> {
+  return await invoke<NovelaidDocumentType>('plugin:novelaid-fs|get_directory_type', {
+    path,
     parentType,
   });
 }

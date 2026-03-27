@@ -12,31 +12,11 @@ pub(crate) async fn ping<R: Runtime>(
     app.novelaid_fs().ping(payload)
 }
 
+
 #[command]
 pub(crate) fn get_document_type(
     path: String,
-    is_directory: bool,
-    parent_type: Option<NovelaidDocumentType>,
 ) -> NovelaidDocumentType {
-    let name = path.to_lowercase();
-
-    if is_directory {
-        if name.contains("小説") || name.contains("novel") {
-            return NovelaidDocumentType::Novel;
-        }
-        if name.contains("設定")
-            || name.contains("プロット")
-            || name.contains("wiki")
-            || name.contains("markdown")
-        {
-            return NovelaidDocumentType::Markdown;
-        }
-        if name.contains("画像") || name.contains("image") {
-            return NovelaidDocumentType::Image;
-        }
-        return parent_type.unwrap_or(NovelaidDocumentType::Novel);
-    }
-
     let ext = std::path::Path::new(&path)
         .extension()
         .and_then(|s| s.to_str())
@@ -53,6 +33,29 @@ pub(crate) fn get_document_type(
         "css" => NovelaidDocumentType::Css,
         _ => NovelaidDocumentType::Unknown,
     }
+}
+
+#[command]
+pub(crate) fn get_directory_type(
+    path: String,
+    parent_type: Option<NovelaidDocumentType>,
+) -> NovelaidDocumentType {
+    let name = path.to_lowercase();
+
+    if name.contains("小説") || name.contains("novel") {
+        return NovelaidDocumentType::Novel;
+    }
+    if name.contains("設定")
+        || name.contains("プロット")
+        || name.contains("wiki")
+        || name.contains("markdown")
+    {
+        return NovelaidDocumentType::Markdown;
+    }
+    if name.contains("画像") || name.contains("image") {
+        return NovelaidDocumentType::Image;
+    }
+    parent_type.unwrap_or(NovelaidDocumentType::Novel)
 }
 
 #[command]

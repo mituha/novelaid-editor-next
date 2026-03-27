@@ -6,7 +6,7 @@ import './FileExplorer.css';
 
 import { NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
 import { DocumentIcon } from './DocumentIcon';
-import { getDocumentType } from 'tauri-plugin-novelaid-fs-api';
+import { getDocumentType, getDirectoryType } from 'tauri-plugin-novelaid-fs-api';
 
 interface FileExplorerProps {
     projectPath: string;
@@ -32,11 +32,9 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
             const entries = await readDir(path);
             const nodes: FileNode[] = await Promise.all(entries.map(async entry => {
                 const isDirectory = entry.isDirectory;
-                const documentType = await getDocumentType(
-                    entry.name || '',
-                    isDirectory,
-                    parentType
-                );
+                const documentType = isDirectory 
+                    ? await getDirectoryType(entry.name || '', parentType)
+                    : await getDocumentType(entry.name || '');
 
                 return {
                     name: entry.name || '',

@@ -295,6 +295,18 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "Enables the get_directory_type command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-directory-type",
+          "markdownDescription": "Enables the get_directory_type command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_directory_type command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-directory-type",
+          "markdownDescription": "Denies the get_directory_type command without any pre-configured scope."
+        },
+        {
           "description": "Enables the get_document_type command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-document-type",
@@ -331,6 +343,18 @@
           "markdownDescription": "Denies the ping command without any pre-configured scope."
         },
         {
+          "description": "Enables the read_directory command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-read-directory",
+          "markdownDescription": "Enables the read_directory command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the read_directory command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-read-directory",
+          "markdownDescription": "Denies the read_directory command without any pre-configured scope."
+        },
+        {
           "description": "Enables the set_project_directory command without any pre-configured scope.",
           "type": "string",
           "const": "allow-set-project-directory",
@@ -343,10 +367,10 @@
           "markdownDescription": "Denies the set_project_directory command without any pre-configured scope."
         },
         {
-          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-set-project-directory`\n- `allow-get-project-directory`",
+          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-get-directory-type`\n- `allow-read-directory`\n- `allow-set-project-directory`\n- `allow-get-project-directory`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-set-project-directory`\n- `allow-get-project-directory`"
+          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-get-directory-type`\n- `allow-read-directory`\n- `allow-set-project-directory`\n- `allow-get-project-directory`"
         }
       ]
     }

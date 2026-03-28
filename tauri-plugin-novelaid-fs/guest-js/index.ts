@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
-import { NovelaidDocumentType } from './models'
+import { NovelaidDocumentType, NovelaidDirEntry } from './models'
 
 export * from './models'
 
@@ -38,4 +38,14 @@ export async function setProjectDirectory(path: string | null): Promise<void> {
 export async function getProjectDirectory(): Promise<string | null> {
   return await invoke<string | null>('plugin:novelaid-fs|get_project_directory');
 }
-
+export async function readDirectory(
+  path: string,
+  recursive: boolean = false,
+  parentType?: NovelaidDocumentType
+): Promise<NovelaidDirEntry[]> {
+  return await invoke<NovelaidDirEntry[]>('plugin:novelaid-fs|read_directory', {
+    path,
+    recursive,
+    parentType,
+  });
+}

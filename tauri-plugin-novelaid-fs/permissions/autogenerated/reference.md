@@ -6,6 +6,8 @@ Default permissions for the plugin
 
 - `allow-ping`
 - `allow-get-document-type`
+- `allow-get-directory-type`
+- `allow-read-directory`
 - `allow-set-project-directory`
 - `allow-get-project-directory`
 
@@ -17,6 +19,32 @@ Default permissions for the plugin
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`novelaid-fs:allow-get-directory-type`
+
+</td>
+<td>
+
+Enables the get_directory_type command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`novelaid-fs:deny-get-directory-type`
+
+</td>
+<td>
+
+Denies the get_directory_type command without any pre-configured scope.
+
+</td>
+</tr>
 
 <tr>
 <td>
@@ -92,6 +120,32 @@ Enables the ping command without any pre-configured scope.
 <td>
 
 Denies the ping command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`novelaid-fs:allow-read-directory`
+
+</td>
+<td>
+
+Enables the read_directory command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`novelaid-fs:deny-read-directory`
+
+</td>
+<td>
+
+Denies the read_directory command without any pre-configured scope.
 
 </td>
 </tr>

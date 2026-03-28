@@ -12,6 +12,63 @@ pub(crate) async fn ping<R: Runtime>(
     app.novelaid_fs().ping(payload)
 }
 
+fn read_dir_recursive(
+    path: &std::path::Path,
+    recursive: bool,
+    parent_type: Option<NovelaidDocumentType>,
+) -> std::result::Result<Vec<NovelaidDirEntry>, std::io::Error> {
+    let mut entries = vec![];
+    let dir = std::fs::read_dir(path)?;
+    for entry in dir {
+        let entry = entry?;
+        let file_type = entry.file_type()?;
+        let is_directory = file_type.is_dir();
+        let file_name = entry.file_name().to_string_lossy().to_string();
+        let document_type = if is_directory {
+            get_directory_type(file_name.clone(), parent_type)
+        } else {
+            get_document_type(file_name.clone())
+        };
+
+        let children = if is_directory && recursive {
+            Some(read_dir_recursive(&entry.path(), true, Some(document_type))?)
+        } else {
+            None
+        };
+
+        entries.push(NovelaidDirEntry {
+            name: file_name,
+            is_directory,
+            document_type,
+            children,
+        });
+    }
+    
+    // Sort directories first, then alphabetical
+    entries.sort_by(|a, b| {
+        match (a.is_directory, b.is_directory) {
+            (true, false) => std::cmp::Ordering::Less,
+            (false, true) => std::cmp::Ordering::Greater,
+            _ => a.name.cmp(&b.name),
+        }
+    });
+
+    Ok(entries)
+}
+
+#[command]
+pub(crate) async fn read_directory(
+    path: String,
+    recursive: bool,
+    parent_type: Option<NovelaidDocumentType>,
+) -> Result<Vec<NovelaidDirEntry>> {
+    tauri::async_runtime::spawn_blocking(move || {
+        read_dir_recursive(std::path::Path::new(&path), recursive, parent_type)
+    })
+    .await
+    .unwrap_or_else(|e| Err(std::io::Error::new(std::io::ErrorKind::Other, e.to_string())))
+    .map_err(crate::Error::Io)
+}
 
 #[command]
 pub(crate) fn get_document_type(

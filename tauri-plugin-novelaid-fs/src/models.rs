@@ -16,6 +16,16 @@ pub enum NovelaidDocumentType {
     External,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../guest-js/models.ts")]
+#[serde(rename_all = "camelCase")]
+pub struct NovelaidDirEntry {
+    pub name: String,
+    pub is_directory: bool,
+    pub document_type: NovelaidDocumentType,
+    pub children: Option<Vec<NovelaidDirEntry>>,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PingRequest {

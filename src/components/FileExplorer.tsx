@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { readDir } from '@tauri-apps/plugin-fs';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
 import './FileExplorer.css';
 
-import { NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
 import { DocumentIcon } from './DocumentIcon';
-import { getDocumentType, getDirectoryType } from 'tauri-plugin-novelaid-fs-api';
+import { NovelaidDocumentType, readDirectory, NovelaidDirEntry } from 'tauri-plugin-novelaid-fs-api';
 
 interface FileExplorerProps {
     projectPath: string;
@@ -27,31 +25,25 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
     const [error, setError] = useState<string | null>(null);
     const { openFile, activeFilePath } = useDocument();
 
-    const loadFiles = async (path: string, parentType: NovelaidDocumentType = 'novel'): Promise<FileNode[]> => {
+    const loadFiles = async (path: string, parentType: NovelaidDocumentType = 'novel', recursive = false): Promise<FileNode[]> => {
         try {
-            const entries = await readDir(path);
-            const nodes: FileNode[] = await Promise.all(entries.map(async entry => {
-                const isDirectory = entry.isDirectory;
-                const documentType = isDirectory 
-                    ? await getDirectoryType(entry.name || '', parentType)
-                    : await getDocumentType(entry.name || '');
+            const entries = await readDirectory(path, recursive, parentType);
 
-                return {
-                    name: entry.name || '',
-                    path: `${path}/${entry.name}`,
-                    isDirectory: entry.isDirectory,
-                    isOpen: false,
-                    children: entry.isDirectory ? [] : undefined,
-                    documentType: documentType
-                };
-            }));
+            const processEntries = (entries: NovelaidDirEntry[], currentPath: string): FileNode[] => {
+                return entries.map(entry => {
+                    const nodePath = `${currentPath}/${entry.name}`;
+                    return {
+                        name: entry.name,
+                        path: nodePath,
+                        isDirectory: entry.isDirectory,
+                        isOpen: false,
+                        children: entry.children ? processEntries(entry.children, nodePath) : (entry.isDirectory ? [] : undefined),
+                        documentType: entry.documentType
+                    };
+                });
+            };
 
-            // Sort: directories first, then files alphabetically
-            return nodes.sort((a, b) => {
-                if (a.isDirectory && !b.isDirectory) return -1;
-                if (!a.isDirectory && b.isDirectory) return 1;
-                return a.name.localeCompare(b.name) || 0;
-            });
+            return processEntries(entries, path);
         } catch (err) {
             console.error('Failed to read directory:', err);
             throw err;

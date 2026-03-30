@@ -7,4 +7,8 @@ permissions = [
     "allow-read-directory",
     "allow-set-project-directory",
     "allow-get-project-directory",
+    "allow-read-document",
+    "allow-write-document",
+    "allow-get-metadata-cache",
+    "allow-scan-project-metadata",
 ]

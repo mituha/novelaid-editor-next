@@ -1,0 +1,2 @@
+    Checking tauri-plugin-novelaid-fs v0.2.0 (D:\home\mituha\repos\novelaid-editor-next\tauri-plugin-novelaid-fs)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.70s

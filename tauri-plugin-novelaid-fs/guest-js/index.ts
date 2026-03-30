@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
-import { NovelaidDocumentType, NovelaidDirEntry } from './models'
+import { NovelaidDocumentType, NovelaidDirEntry, NovelaidDocument } from './models'
 
 export * from './models'
 
@@ -48,4 +48,28 @@ export async function readDirectory(
     recursive,
     parentType,
   });
+}
+
+export async function readDocument(path: string): Promise<NovelaidDocument> {
+  return await invoke<NovelaidDocument>('plugin:novelaid-fs|read_document', {
+    path,
+  });
+}
+
+export async function writeDocument(
+  path: string,
+  document: NovelaidDocument,
+): Promise<void> {
+  await invoke('plugin:novelaid-fs|write_document', {
+    path,
+    document,
+  });
+}
+
+export async function getMetadataCache(): Promise<Record<string, any>> {
+  return await invoke<Record<string, any>>('plugin:novelaid-fs|get_metadata_cache');
+}
+
+export async function scanProjectMetadata(): Promise<void> {
+  await invoke('plugin:novelaid-fs|scan_project_metadata');
 }

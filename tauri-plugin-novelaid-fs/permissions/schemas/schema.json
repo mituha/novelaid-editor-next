@@ -319,6 +319,18 @@
           "markdownDescription": "Denies the get_document_type command without any pre-configured scope."
         },
         {
+          "description": "Enables the get_metadata_cache command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-metadata-cache",
+          "markdownDescription": "Enables the get_metadata_cache command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_metadata_cache command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-metadata-cache",
+          "markdownDescription": "Denies the get_metadata_cache command without any pre-configured scope."
+        },
+        {
           "description": "Enables the get_project_directory command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-project-directory",
@@ -355,6 +367,30 @@
           "markdownDescription": "Denies the read_directory command without any pre-configured scope."
         },
         {
+          "description": "Enables the read_document command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-read-document",
+          "markdownDescription": "Enables the read_document command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the read_document command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-read-document",
+          "markdownDescription": "Denies the read_document command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the scan_project_metadata command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-scan-project-metadata",
+          "markdownDescription": "Enables the scan_project_metadata command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the scan_project_metadata command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-scan-project-metadata",
+          "markdownDescription": "Denies the scan_project_metadata command without any pre-configured scope."
+        },
+        {
           "description": "Enables the set_project_directory command without any pre-configured scope.",
           "type": "string",
           "const": "allow-set-project-directory",
@@ -367,10 +403,22 @@
           "markdownDescription": "Denies the set_project_directory command without any pre-configured scope."
         },
         {
-          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-get-directory-type`\n- `allow-read-directory`\n- `allow-set-project-directory`\n- `allow-get-project-directory`",
+          "description": "Enables the write_document command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-write-document",
+          "markdownDescription": "Enables the write_document command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the write_document command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-write-document",
+          "markdownDescription": "Denies the write_document command without any pre-configured scope."
+        },
+        {
+          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-get-directory-type`\n- `allow-read-directory`\n- `allow-set-project-directory`\n- `allow-get-project-directory`\n- `allow-read-document`\n- `allow-write-document`\n- `allow-get-metadata-cache`\n- `allow-scan-project-metadata`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-get-directory-type`\n- `allow-read-directory`\n- `allow-set-project-directory`\n- `allow-get-project-directory`"
+          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-get-directory-type`\n- `allow-read-directory`\n- `allow-set-project-directory`\n- `allow-get-project-directory`\n- `allow-read-document`\n- `allow-write-document`\n- `allow-get-metadata-cache`\n- `allow-scan-project-metadata`"
         }
       ]
     }

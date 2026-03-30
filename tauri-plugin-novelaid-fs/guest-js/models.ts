@@ -2,4 +2,6 @@
 
 export type NovelaidDirEntry = { name: string, isDirectory: boolean, documentType: NovelaidDocumentType, children: Array<NovelaidDirEntry> | null, };
 
+export type NovelaidDocument = { content: string, metadata: any, documentType: NovelaidDocumentType, };
+
 export type NovelaidDocumentType = "novel" | "markdown" | "image" | "chat" | "gitDiff" | "browser" | "css" | "unknown" | "external";

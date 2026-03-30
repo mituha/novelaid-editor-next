@@ -134,4 +134,33 @@ pub(crate) async fn get_project_directory<R: Runtime>(
         .get_project_directory()
         .map(|p| p.to_string_lossy().to_string()))
 }
+#[command]
+pub(crate) async fn read_document<R: Runtime>(
+    app: AppHandle<R>,
+    path: String,
+) -> Result<NovelaidDocument> {
+    app.novelaid_fs().read_document(std::path::Path::new(&path))
+}
 
+#[command]
+pub(crate) async fn write_document<R: Runtime>(
+    app: AppHandle<R>,
+    path: String,
+    document: NovelaidDocument,
+) -> Result<()> {
+    app.novelaid_fs().write_document(std::path::Path::new(&path), document)
+}
+
+#[command]
+pub(crate) async fn get_metadata_cache<R: Runtime>(
+    app: AppHandle<R>,
+) -> Result<std::collections::HashMap<String, serde_json::Value>> {
+    Ok(app.novelaid_fs().get_metadata_cache())
+}
+
+#[command]
+pub(crate) async fn scan_project_metadata<R: Runtime>(
+    app: AppHandle<R>,
+) -> Result<()> {
+    app.novelaid_fs().scan_project_metadata()
+}

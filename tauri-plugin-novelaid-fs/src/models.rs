@@ -26,6 +26,16 @@ pub struct NovelaidDirEntry {
     pub children: Option<Vec<NovelaidDirEntry>>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../guest-js/models.ts")]
+#[serde(rename_all = "camelCase")]
+pub struct NovelaidDocument {
+    pub content: String,
+    #[ts(type = "any")]
+    pub metadata: serde_json::Value,
+    pub document_type: NovelaidDocumentType,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PingRequest {

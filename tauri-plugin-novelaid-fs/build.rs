@@ -5,6 +5,10 @@ const COMMANDS: &[&str] = &[
     "set_project_directory",
     "get_project_directory",
     "read_directory",
+    "read_document",
+    "write_document",
+    "get_metadata_cache",
+    "scan_project_metadata",
 ];
 
 fn main() {

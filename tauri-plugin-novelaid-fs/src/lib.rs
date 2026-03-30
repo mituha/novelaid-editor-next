@@ -41,7 +41,11 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
       commands::get_directory_type,
       commands::set_project_directory,
       commands::get_project_directory,
-      commands::read_directory
+      commands::read_directory,
+      commands::read_document,
+      commands::write_document,
+      commands::get_metadata_cache,
+      commands::scan_project_metadata
     ])
     .setup(|app, api| {
       #[cfg(mobile)]

@@ -1,13 +1,16 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { readFile, writeFile } from '@tauri-apps/plugin-fs';
+import { readDocument, writeDocument, NovelaidDocument, NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
 
 interface DocumentContextType {
     activeFilePath: string | null;
     content: string;
+    metadata: Record<string, any>;
+    documentType: NovelaidDocumentType;
     isDirty: boolean;
     openFile: (path: string) => Promise<void>;
     saveFile: () => Promise<void>;
     setContent: (content: string) => void;
+    setMetadata: (metadata: Record<string, any>) => void;
 }
 
 const DocumentContext = createContext<DocumentContextType | undefined>(undefined);
@@ -23,34 +26,45 @@ export const useDocument = () => {
 export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [activeFilePath, setActiveFilePath] = useState<string | null>(null);
     const [content, setContent] = useState('');
+    const [metadata, setMetadata] = useState<Record<string, any>>({});
+    const [documentType, setDocumentType] = useState<NovelaidDocumentType>('novel');
     const [isDirty, setIsDirty] = useState(false);
 
     const openFile = useCallback(async (path: string) => {
         try {
-            const data = await readFile(path);
-            const text = new TextDecoder().decode(data);
+            const doc = await readDocument(path);
             setActiveFilePath(path);
-            setContent(text);
+            setContent(doc.content);
+            setMetadata(doc.metadata || {});
+            setDocumentType(doc.documentType);
             setIsDirty(false);
         } catch (error) {
             console.error('Failed to open file:', error);
-            // Optionally handle error (e.g., toast notification)
         }
     }, []);
 
     const saveFile = useCallback(async () => {
         if (!activeFilePath) return;
         try {
-            const data = new TextEncoder().encode(content);
-            await writeFile(activeFilePath, data);
+            const doc: NovelaidDocument = {
+                content,
+                metadata,
+                documentType
+            };
+            await writeDocument(activeFilePath, doc);
             setIsDirty(false);
         } catch (error) {
             console.error('Failed to save file:', error);
         }
-    }, [activeFilePath, content]);
+    }, [activeFilePath, content, metadata, documentType]);
 
     const handleSetContent = useCallback((newContent: string) => {
         setContent(newContent);
+        setIsDirty(true);
+    }, []);
+
+    const handleSetMetadata = useCallback((newMetadata: Record<string, any>) => {
+        setMetadata(newMetadata);
         setIsDirty(true);
     }, []);
 
@@ -58,10 +72,13 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         <DocumentContext.Provider value={{
             activeFilePath,
             content,
+            metadata,
+            documentType,
             isDirty,
             openFile,
             saveFile,
-            setContent: handleSetContent
+            setContent: handleSetContent,
+            setMetadata: handleSetMetadata
         }}>
             {children}
         </DocumentContext.Provider>

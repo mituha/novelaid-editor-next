@@ -1,0 +1,148 @@
+.metadata-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 300px;
+    flex-shrink: 0;
+    background-color: var(--sidebar-bg, #1e1e1e);
+    border-left: 1px solid var(--border-color, #333);
+    color: var(--text-main, #cccccc);
+    font-size: 13px;
+    overflow-y: auto;
+}
+
+.metadata-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color, #333);
+    background-color: var(--header-bg, #252526);
+}
+
+.metadata-header h3 {
+    margin: 0;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim, #888);
+}
+
+.metadata-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.metadata-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.metadata-field label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-main, #ccc);
+    font-weight: 500;
+}
+
+.metadata-field label span {
+    font-size: 12px;
+}
+
+.metadata-field input,
+.metadata-field textarea {
+    background-color: var(--input-bg, #3c3c3c);
+    border: 1px solid transparent;
+    color: var(--text-main, #eee);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.metadata-field input:focus,
+.metadata-field textarea:focus {
+    border-color: var(--accent-color, #007acc);
+    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+}
+
+.metadata-field textarea {
+    resize: vertical;
+    min-height: 60px;
+    font-family: inherit;
+}
+
+.metadata-divider {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color, #333);
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-dim, #888);
+    letter-spacing: 0.5px;
+}
+
+.custom-field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim, #888);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.remove-btn:hover {
+    background-color: #f4433622;
+    color: #f44336;
+}
+
+.add-field-btn {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    background-color: transparent;
+    border: 1px dashed var(--border-color, #444);
+    color: var(--text-dim, #888);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-field-btn:hover {
+    border-color: var(--accent-color, #007acc);
+    color: var(--accent-color, #007acc);
+    background-color: #007acc11;
+}
+
+.metadata-panel-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+    color: var(--text-dim, #666);
+    text-align: center;
+}
+
+/* Custom field label styling */
+.metadata-field.custom label {
+    font-size: 11px;
+    font-family: monospace;
+    opacity: 0.8;
+}

@@ -4,6 +4,7 @@ import { Settings2, LogOut } from 'lucide-react';
 import { SettingsModal } from '../components/SettingsModal';
 import { FileExplorer } from '../components/FileExplorer';
 import { Editor } from '../components/Editor';
+import { MetadataPanel } from '../components/MetadataPanel';
 import { useProject } from '../contexts/ProjectContext';
 import './MainLayout.css';
 
@@ -57,6 +58,8 @@ export const MainLayout: React.FC = () => {
                     <Editor />
                 </div>
             </main>
+            
+            <MetadataPanel />
 
             <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         </div>

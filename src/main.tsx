@@ -6,6 +6,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AppProvider } from "./contexts/AppContext";
 import { ProjectProvider } from "./contexts/ProjectContext";
 import { DocumentProvider } from "./contexts/DocumentContext";
+import { PanelProvider } from "./contexts/PanelContext";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -13,7 +14,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       <ProjectProvider>
         <ThemeProvider>
           <DocumentProvider>
-            <App />
+            <PanelProvider>
+              <App />
+            </PanelProvider>
           </DocumentProvider>
         </ThemeProvider>
       </ProjectProvider>

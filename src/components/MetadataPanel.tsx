@@ -82,10 +82,7 @@ export const MetadataPanel: React.FC = () => {
     };
 
     return (
-        <aside className="metadata-panel">
-            <div className="metadata-header">
-                <h3>ドキュメント設定</h3>
-            </div>
+        <div className="metadata-panel">
             <div className="metadata-content">
                 {commonFields.map(field => (
                     <div key={field.key} className="metadata-field">
@@ -120,6 +117,6 @@ export const MetadataPanel: React.FC = () => {
                     <span>フィールドを追加</span>
                 </button>
             </div>
-        </aside>
+        </div>
     );
 };

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
+import { useProject } from '../contexts/ProjectContext';
 import './FileExplorer.css';
 
 import { DocumentIcon } from './DocumentIcon';
 import { NovelaidDocumentType, readDirectory, NovelaidDirEntry } from 'tauri-plugin-novelaid-fs-api';
 
 interface FileExplorerProps {
-    projectPath: string;
+    projectPath?: string;
 }
 
 interface FileNode {
@@ -19,7 +20,10 @@ interface FileNode {
     documentType: NovelaidDocumentType;
 }
 
-export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
+export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsProjectPath }) => {
+    const { projectPath: contextProjectPath } = useProject();
+    const projectPath = propsProjectPath || contextProjectPath || '未選択';
+    
     const [files, setFiles] = useState<FileNode[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -135,9 +139,6 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath }) => {
 
     return (
         <div className="file-explorer">
-            <div className="file-explorer-header">
-                <span>ファイル</span>
-            </div>
             <div className="file-explorer-content">
                 {files.map((file: FileNode) => renderNode(file))}
             </div>

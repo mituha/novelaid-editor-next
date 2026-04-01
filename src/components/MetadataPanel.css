@@ -2,13 +2,16 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    width: 300px;
-    flex-shrink: 0;
-    background-color: var(--sidebar-bg, #1e1e1e);
-    border-left: 1px solid var(--border-color, #333);
+    width: 100%;
+    background-color: transparent;
     color: var(--text-main, #cccccc);
     font-size: 13px;
     overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.metadata-panel * {
+    box-sizing: border-box;
 }
 
 .metadata-header {
@@ -52,6 +55,7 @@
 
 .metadata-field input,
 .metadata-field textarea {
+    width: 100%;
     background-color: var(--input-bg, #3c3c3c);
     border: 1px solid transparent;
     color: var(--text-main, #eee);

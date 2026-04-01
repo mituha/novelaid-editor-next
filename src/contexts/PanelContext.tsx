@@ -70,10 +70,14 @@ export const PanelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }, []);
 
     const setPaneWidth = useCallback((side: PaneSide, width: number) => {
+        const minWidth = 150;
+        const maxWidth = window.innerWidth * 0.5;
+        const constrainedWidth = Math.max(minWidth, Math.min(maxWidth, width));
+
         if (side === 'left') {
-            setLeftPane(prev => ({ ...prev, width }));
+            setLeftPane(prev => ({ ...prev, width: constrainedWidth }));
         } else {
-            setRightPane(prev => ({ ...prev, width }));
+            setRightPane(prev => ({ ...prev, width: constrainedWidth }));
         }
     }, []);
 

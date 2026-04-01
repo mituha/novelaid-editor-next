@@ -3,7 +3,9 @@
     height: 100%;
     background-color: var(--bg-surface);
     border-right: 1px solid var(--border-color);
-    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    /* overflow: hidden; Removed to allow ResizeHandle visible at the edge */
 }
 
 .side-pane.right {
@@ -106,7 +108,15 @@
 
 .pane-body {
     flex: 1;
-    overflow: hidden; /* Let child handle its own scrolling if needed */
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.pane-body > * {
+    flex: 1;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
 }

@@ -1,0 +1,33 @@
+.resize-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    z-index: 100;
+    cursor: col-resize;
+    transition: background-color 0.2s;
+}
+
+.resize-handle.left {
+    right: -2px;
+}
+
+.resize-handle.right {
+    left: -2px;
+}
+
+.resize-handle:hover,
+.resize-handle.dragging {
+    background-color: var(--accent-color);
+    opacity: 0.8;
+}
+
+.resize-handle::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -2px;
+    right: -2px;
+    /* Invisible helper area to make it easier to grab */
+}

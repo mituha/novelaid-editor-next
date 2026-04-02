@@ -27,7 +27,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
     const [files, setFiles] = useState<FileNode[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { openFile, activeFilePath } = useDocument();
+    const { openDocument, activeFilePath } = useDocument();
 
     const loadFiles = async (path: string, parentType: NovelaidDocumentType = 'novel', recursive = false): Promise<FileNode[]> => {
         try {
@@ -103,7 +103,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
                 <div
                     className={`file-node ${isDirectory ? 'directory' : 'file'} type-${node.documentType} ${activeFilePath === node.path ? 'active' : ''}`}
                     style={{ paddingLeft: `${depth * 12 + 8}px` }}
-                    onClick={() => isDirectory ? toggleFolder(node) : openFile(node.path)}
+                    onClick={() => isDirectory ? toggleFolder(node) : openDocument(node.path)}
                 >
                     {ChevronIcon && <ChevronIcon size={14} className="folder-chevron" />}
                     {!ChevronIcon && <div className="chevron-spacer" />}

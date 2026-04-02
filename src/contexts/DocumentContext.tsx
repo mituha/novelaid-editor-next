@@ -1,16 +1,31 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { readDocument, writeDocument, NovelaidDocument, NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
 
-interface DocumentContextType {
-    activeFilePath: string | null;
+export interface DocumentState {
+    path: string;
     content: string;
     metadata: Record<string, any>;
     documentType: NovelaidDocumentType;
     isDirty: boolean;
-    openFile: (path: string) => Promise<void>;
+}
+
+interface DocumentContextType {
+    openDocuments: DocumentState[];
+    activeDocumentPath: string | null;
+    activeDocument: DocumentState | null;
+    openDocument: (path: string) => Promise<void>;
+    closeDocument: (path: string) => void;
+    switchDocument: (path: string) => void;
+    saveDocument: (path?: string) => Promise<void>;
+    setContent: (content: string, path?: string) => void;
+    setMetadata: (metadata: Record<string, any>, path?: string) => void;
+    
+    // Legacy support or simplified access for current active
+    activeFilePath: string | null; 
+    content: string;
+    metadata: Record<string, any>;
+    isDirty: boolean;
     saveFile: () => Promise<void>;
-    setContent: (content: string) => void;
-    setMetadata: (metadata: Record<string, any>) => void;
 }
 
 const DocumentContext = createContext<DocumentContextType | undefined>(undefined);
@@ -24,62 +39,124 @@ export const useDocument = () => {
 };
 
 export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [activeFilePath, setActiveFilePath] = useState<string | null>(null);
-    const [content, setContent] = useState('');
-    const [metadata, setMetadata] = useState<Record<string, any>>({});
-    const [documentType, setDocumentType] = useState<NovelaidDocumentType>('novel');
-    const [isDirty, setIsDirty] = useState(false);
+    const [openDocuments, setOpenDocuments] = useState<DocumentState[]>([]);
+    const [activeDocumentPath, setActiveDocumentPath] = useState<string | null>(null);
 
-    const openFile = useCallback(async (path: string) => {
+    const activeDocument = useMemo(() => {
+        return openDocuments.find(doc => doc.path === activeDocumentPath) || null;
+    }, [openDocuments, activeDocumentPath]);
+
+    const openDocument = useCallback(async (path: string) => {
+        // If already open, just switch
+        const existingDoc = openDocuments.find(doc => doc.path === path);
+        if (existingDoc) {
+            setActiveDocumentPath(path);
+            return;
+        }
+
         try {
             const doc = await readDocument(path);
-            setActiveFilePath(path);
-            setContent(doc.content);
-            setMetadata(doc.metadata || {});
-            setDocumentType(doc.documentType);
-            setIsDirty(false);
-        } catch (error) {
-            console.error('Failed to open file:', error);
-        }
-    }, []);
-
-    const saveFile = useCallback(async () => {
-        if (!activeFilePath) return;
-        try {
-            const doc: NovelaidDocument = {
-                content,
-                metadata,
-                documentType
+            const newState: DocumentState = {
+                path,
+                content: doc.content,
+                metadata: doc.metadata || {},
+                documentType: doc.documentType,
+                isDirty: false
             };
-            await writeDocument(activeFilePath, doc);
-            setIsDirty(false);
+            setOpenDocuments(prev => [...prev, newState]);
+            setActiveDocumentPath(path);
         } catch (error) {
-            console.error('Failed to save file:', error);
+            console.error('Failed to open document:', error);
         }
-    }, [activeFilePath, content, metadata, documentType]);
+    }, [openDocuments]);
 
-    const handleSetContent = useCallback((newContent: string) => {
-        setContent(newContent);
-        setIsDirty(true);
+    const closeDocument = useCallback((path: string) => {
+        setOpenDocuments(prev => {
+            const index = prev.findIndex(doc => doc.path === path);
+            if (index === -1) return prev;
+
+            const newDocs = prev.filter(doc => doc.path !== path);
+            
+            // If we closed the active document, switch to another one
+            if (activeDocumentPath === path) {
+                if (newDocs.length > 0) {
+                    // Try to pick the next one or the last one
+                    const nextDoc = newDocs[index] || newDocs[newDocs.length - 1];
+                    setActiveDocumentPath(nextDoc.path);
+                } else {
+                    setActiveDocumentPath(null);
+                }
+            }
+            
+            return newDocs;
+        });
+    }, [activeDocumentPath]);
+
+    const switchDocument = useCallback((path: string) => {
+        setActiveDocumentPath(path);
     }, []);
 
-    const handleSetMetadata = useCallback((newMetadata: Record<string, any>) => {
-        setMetadata(newMetadata);
-        setIsDirty(true);
-    }, []);
+    const setContent = useCallback((newContent: string, path?: string) => {
+        const targetPath = path || activeDocumentPath;
+        if (!targetPath) return;
+
+        setOpenDocuments(prev => prev.map(doc => 
+            doc.path === targetPath ? { ...doc, content: newContent, isDirty: true } : doc
+        ));
+    }, [activeDocumentPath]);
+
+    const setMetadata = useCallback((newMetadata: Record<string, any>, path?: string) => {
+        const targetPath = path || activeDocumentPath;
+        if (!targetPath) return;
+
+        setOpenDocuments(prev => prev.map(doc => 
+            doc.path === targetPath ? { ...doc, metadata: newMetadata, isDirty: true } : doc
+        ));
+    }, [activeDocumentPath]);
+
+    const saveDocument = useCallback(async (path?: string) => {
+        const targetPath = path || activeDocumentPath;
+        const docToSave = openDocuments.find(doc => doc.path === targetPath);
+        if (!targetPath || !docToSave) return;
+
+        try {
+            const novelaidDoc: NovelaidDocument = {
+                content: docToSave.content,
+                metadata: docToSave.metadata,
+                documentType: docToSave.documentType
+            };
+            await writeDocument(targetPath, novelaidDoc);
+            
+            setOpenDocuments(prev => prev.map(doc => 
+                doc.path === targetPath ? { ...doc, isDirty: false } : doc
+            ));
+        } catch (error) {
+            console.error('Failed to save document:', error);
+        }
+    }, [activeDocumentPath, openDocuments]);
+
+    // Legacy/Simplified interface
+    const contextValue: DocumentContextType = {
+        openDocuments,
+        activeDocumentPath,
+        activeDocument,
+        openDocument,
+        closeDocument,
+        switchDocument,
+        saveDocument,
+        setContent,
+        setMetadata,
+        
+        // Aliases for compatibility
+        activeFilePath: activeDocumentPath,
+        content: activeDocument?.content || '',
+        metadata: activeDocument?.metadata || {},
+        isDirty: activeDocument?.isDirty || false,
+        saveFile: () => saveDocument()
+    };
 
     return (
-        <DocumentContext.Provider value={{
-            activeFilePath,
-            content,
-            metadata,
-            documentType,
-            isDirty,
-            openFile,
-            saveFile,
-            setContent: handleSetContent,
-            setMetadata: handleSetMetadata
-        }}>
+        <DocumentContext.Provider value={contextValue}>
             {children}
         </DocumentContext.Provider>
     );

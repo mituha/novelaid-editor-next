@@ -4,6 +4,7 @@ import { SettingsModal } from '../components/SettingsModal';
 import { Editor } from '../components/Editor';
 import { SidePane } from '../components/SidePane/SidePane';
 import { useProject } from '../contexts/ProjectContext';
+import { DocumentTabs } from '../components/DocumentTabs';
 import './MainLayout.css';
 
 export const MainLayout: React.FC = () => {
@@ -37,9 +38,7 @@ export const MainLayout: React.FC = () => {
             <SidePane side="left" />
             
             <main className="editor-area">
-                <header className="editor-header">
-                    <h3>メインエディター</h3>
-                </header>
+                <DocumentTabs />
                 <div className="editor-content">
                     <Editor />
                 </div>

@@ -16,24 +16,6 @@
     overflow: hidden;
 }
 
-.editor-header {
-    height: 35px; /* Unified with PaneHeader height */
-    padding: 0 1.5rem;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    background-color: var(--bg-surface);
-}
-
-.editor-header h3 {
-    margin: 0;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-}
-
 .editor-content {
     flex: 1;
     padding: 0;

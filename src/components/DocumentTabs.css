@@ -1,0 +1,101 @@
+.document-tabs {
+    display: flex;
+    background-color: var(--bg-secondary, #1e1e1e);
+    border-bottom: 1px solid var(--border-color, #333);
+    height: 35px;
+    user-select: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.document-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tabs-container {
+    display: flex;
+    flex: 1;
+}
+
+.document-tab {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    min-width: 120px;
+    max-width: 200px;
+    height: 100%;
+    border-right: 1px solid var(--border-color, #333);
+    cursor: pointer;
+    background-color: var(--bg-secondary, #1e1e1e);
+    color: var(--text-muted, #999);
+    font-size: 0.85rem;
+    position: relative;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.document-tab:hover {
+    background-color: var(--bg-tertiary, #2d2d2d);
+    color: var(--text-primary, #fff);
+}
+
+.document-tab.active {
+    background-color: var(--bg-primary, #252526);
+    color: var(--text-primary, #fff);
+    border-bottom: 1px solid var(--accent-color, #007acc);
+}
+
+.document-tab .tab-icon {
+    margin-right: 8px;
+    opacity: 0.8;
+}
+
+.document-tab .tab-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.document-tab .dirty-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--accent-light, #4fc1ff);
+    margin: 0 4px;
+    box-shadow: 0 0 5px rgba(79, 193, 255, 0.5);
+}
+
+.document-tab .tab-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-left: 4px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+
+.document-tab:hover .tab-close,
+.document-tab.active .tab-close {
+    opacity: 0.6;
+}
+
+.document-tab:hover .tab-close:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* If dirty, we hide the close button and show the circle, until hover */
+.document-tab.dirty:not(:hover) .tab-close {
+    display: none;
+}
+
+.document-tab.dirty:hover .dirty-indicator {
+    display: none;
+}

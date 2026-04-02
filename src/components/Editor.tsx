@@ -54,6 +54,7 @@ export const Editor: React.FC = () => {
     return (
         <div className="editor-container">
             <MonacoEditor
+                key={activeFilePath}
                 height="100%"
                 language={getLanguage(activeFilePath)}
                 theme={theme === 'dark' ? 'vs-dark' : 'light'}

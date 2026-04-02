@@ -16,33 +16,6 @@
     overflow: hidden;
 }
 
-.editor-area.split {
-    /* Resizer handles the gap and border */
-}
-
-.pane-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--bg-color);
-    min-width: 0;
-    overflow: hidden;
-}
-
-.pane-container.focused {
-    z-index: 10;
-    /* Optional: display a subtle highlight or shadow for focused pane */
-}
-
-.editor-content {
-    flex: 1;
-    padding: 0;
-    overflow: hidden;
-    position: relative;
-    border-top: 1px solid var(--border-color);
-}
-
-
 .layout-footer {
     position: fixed;
     bottom: 20px;

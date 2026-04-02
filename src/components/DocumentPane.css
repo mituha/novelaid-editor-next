@@ -1,0 +1,21 @@
+.pane-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-color);
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.pane-container.focused {
+    z-index: 10;
+}
+
+.editor-content {
+    flex: 1;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    border-top: 1px solid var(--border-color);
+}

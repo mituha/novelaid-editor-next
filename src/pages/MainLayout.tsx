@@ -6,6 +6,7 @@ import { SidePane } from '../components/SidePane/SidePane';
 import { useProject } from '../contexts/ProjectContext';
 import { DocumentTabs } from '../components/DocumentTabs';
 import { useDocument } from '../contexts/DocumentContext';
+import { SplitResizer } from '../components/SplitResizer';
 import './MainLayout.css';
 
 export const MainLayout: React.FC = () => {
@@ -13,7 +14,7 @@ export const MainLayout: React.FC = () => {
     const navigate = useNavigate();
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const { setProjectPath } = useProject();
-    const { isSplit, activePane, setActivePane } = useDocument();
+    const { isSplit, activePane, setActivePane, splitRatio } = useDocument();
     
     // Get project path from Router state
     const currentPath = location.state?.projectPath;
@@ -43,6 +44,7 @@ export const MainLayout: React.FC = () => {
                 <div 
                     className={`pane-container left ${isSplit && activePane === 'left' ? 'focused' : ''}`}
                     onClick={() => isSplit && setActivePane('left')}
+                    style={isSplit ? { flex: splitRatio } : undefined}
                 >
                     <DocumentTabs pane="left" />
                     <div className="editor-content">
@@ -51,15 +53,19 @@ export const MainLayout: React.FC = () => {
                 </div>
                 
                 {isSplit && (
-                    <div 
-                        className={`pane-container right ${activePane === 'right' ? 'focused' : ''}`}
-                        onClick={() => setActivePane('right')}
-                    >
-                        <DocumentTabs pane="right" />
-                        <div className="editor-content">
-                            <Editor pane="right" />
+                    <>
+                        <SplitResizer />
+                        <div 
+                            className={`pane-container right ${activePane === 'right' ? 'focused' : ''}`}
+                            onClick={() => setActivePane('right')}
+                            style={{ flex: 1 - splitRatio }}
+                        >
+                            <DocumentTabs pane="right" />
+                            <div className="editor-content">
+                                <Editor pane="right" />
+                            </div>
                         </div>
-                    </div>
+                    </>
                 )}
             </main>
             

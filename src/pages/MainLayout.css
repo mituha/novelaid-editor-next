@@ -17,8 +17,7 @@
 }
 
 .editor-area.split {
-    gap: 1px;
-    background-color: var(--border-color); /* Separator color */
+    /* Resizer handles the gap and border */
 }
 
 .pane-container {

@@ -1,0 +1,29 @@
+.split-resizer {
+    width: 4px;
+    margin: 0 -2px; /* Center the larger target area over the 1px border */
+    background-color: transparent;
+    cursor: col-resize;
+    z-index: 100;
+    position: relative;
+    transition: background-color 0.2s;
+}
+
+.split-resizer:hover,
+.split-resizer.dragging {
+    background-color: var(--accent-color, #007acc);
+}
+
+/* Add a visual border that is always visible */
+.split-resizer::after {
+    content: '';
+    position: absolute;
+    left: 1.5px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--border-color, #333);
+}
+
+.split-resizer.dragging::after {
+    background-color: transparent;
+}

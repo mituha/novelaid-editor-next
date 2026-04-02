@@ -18,6 +18,7 @@ interface DocumentContextType {
     activeRightPath: string | null;
     isSplit: boolean;
     activePane: 'left' | 'right';
+    splitRatio: number; // 0 to 1
     
     openDocument: (path: string, pane?: 'left' | 'right') => Promise<void>;
     closeDocument: (path: string, pane: 'left' | 'right') => void;
@@ -27,6 +28,7 @@ interface DocumentContextType {
     setMetadata: (metadata: Record<string, any>, path?: string) => void;
     toggleSplit: () => void;
     setActivePane: (pane: 'left' | 'right') => void;
+    setSplitRatio: (ratio: number) => void;
     
     // Legacy support or simplified access for current active
     activeFilePath: string | null; 
@@ -52,6 +54,7 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [activeRightPath, setActiveRightPath] = useState<string | null>(null);
     const [isSplit, setIsSplit] = useState(false);
     const [activePane, setActivePane] = useState<'left' | 'right'>('left');
+    const [splitRatio, setSplitRatio] = useState(0.5);
 
     const activeDocumentPath = useMemo(() => {
         return activePane === 'left' ? activeLeftPath : activeRightPath;
@@ -181,6 +184,10 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setIsSplit(nextSplit);
     }, [isSplit, activeLeftPath]);
 
+    const handleSetSplitRatio = useCallback((ratio: number) => {
+        setSplitRatio(Math.max(0.1, Math.min(0.9, ratio)));
+    }, []);
+
     const setContent = useCallback((newContent: string, path?: string) => {
         const targetPath = path || activeDocumentPath;
         if (!targetPath) return;
@@ -234,6 +241,8 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setMetadata,
         toggleSplit,
         setActivePane,
+        splitRatio,
+        setSplitRatio: handleSetSplitRatio,
         
         // Legacy/Simplified interface
         activeFilePath: activeDocumentPath,

@@ -5,13 +5,28 @@ import { useTheme } from '../contexts/ThemeContext';
 import { NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
 import './Editor.css';
 
-export const Editor: React.FC = () => {
-    const { activeDocument, content, setContent, saveFile } = useDocument();
+interface EditorProps {
+    pane: 'left' | 'right';
+}
+
+export const Editor: React.FC<EditorProps> = ({ pane }) => {
+    const { 
+        openDocuments,
+        activeLeftPath,
+        activeRightPath,
+        setActivePane,
+        setContent, 
+        saveFile 
+    } = useDocument();
+
+    const activeDocumentPath = pane === 'left' ? activeLeftPath : activeRightPath;
+    const activeDocument = openDocuments.find(doc => doc.path === activeDocumentPath) || null;
+    const content = activeDocument?.content || '';
     const { theme } = useTheme();
     const saveFileRef = React.useRef(saveFile);
     const editorRef = React.useRef<any>(null);
     const decorationsRef = React.useRef<string[]>([]);
-    const activeFilePath = activeDocument?.path || null;
+    const activeFilePath = activeDocumentPath;
 
     // Update ref when saveFile changes
     React.useEffect(() => {
@@ -51,6 +66,12 @@ export const Editor: React.FC = () => {
 
     const handleEditorMount: OnMount = (editor, monaco) => {
         editorRef.current = editor;
+
+        // Focus handler to update active pane
+        editor.onDidFocusEditorWidget(() => {
+            setActivePane(pane);
+        });
+
         decorationsRef.current = []; // 前のエディタインスタンスのデコレーションIDをクリア
         
         // 言語登録

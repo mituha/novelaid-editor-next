@@ -1,18 +1,32 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Columns2 } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
 import { DocumentIcon } from './DocumentIcon';
 import './DocumentTabs.css';
 
-export const DocumentTabs: React.FC = () => {
+interface DocumentTabsProps {
+    pane: 'left' | 'right';
+}
+
+export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
     const { 
         openDocuments, 
-        activeDocumentPath, 
+        activeLeftPath, 
+        activeRightPath,
         switchDocument, 
         closeDocument, 
+        toggleSplit,
+        isSplit,
+        activePane,
+        setActivePane
     } = useDocument();
 
-    if (openDocuments.length === 0) {
+    const activeDocumentPath = pane === 'left' ? activeLeftPath : activeRightPath;
+    const filteredDocuments = openDocuments.filter(doc => 
+        pane === 'left' ? doc.isInLeft : doc.isInRight
+    );
+
+    if (filteredDocuments.length === 0 && !isSplit) {
         return null;
     }
 
@@ -21,9 +35,9 @@ export const DocumentTabs: React.FC = () => {
     };
 
     return (
-        <div className="document-tabs">
+        <div className={`document-tabs ${isSplit && activePane === pane ? 'focused' : ''}`}>
             <div className="tabs-container">
-                {openDocuments.map((doc) => {
+                {filteredDocuments.map((doc) => {
                     const isActive = doc.path === activeDocumentPath;
                     const fileName = getFileName(doc.path);
 
@@ -31,7 +45,10 @@ export const DocumentTabs: React.FC = () => {
                         <div
                             key={doc.path}
                             className={`document-tab ${isActive ? 'active' : ''} ${doc.isDirty ? 'dirty' : ''}`}
-                            onClick={() => switchDocument(doc.path)}
+                            onClick={() => {
+                                switchDocument(doc.path, pane);
+                                setActivePane(pane);
+                            }}
                             title={doc.path}
                         >
                             <DocumentIcon
@@ -50,7 +67,7 @@ export const DocumentTabs: React.FC = () => {
                                 className="tab-close"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    closeDocument(doc.path);
+                                    closeDocument(doc.path, pane);
                                 }}
                                 title="閉じる"
                             >
@@ -61,8 +78,18 @@ export const DocumentTabs: React.FC = () => {
                 })}
             </div>
             <div className="tabs-actions">
-                {/* Future global actions for tabs could go here */}
+                <button 
+                    className={`action-button ${isSplit ? 'active' : ''}`}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSplit();
+                    }}
+                    title={isSplit ? "分割を解除" : "左右に分割"}
+                >
+                    <Columns2 size={16} />
+                </button>
             </div>
         </div>
     );
 };
+

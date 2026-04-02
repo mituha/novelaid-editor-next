@@ -10,10 +10,29 @@
 .editor-area {
     flex: 1;
     display: flex;
+    flex-direction: row;
+    background-color: var(--bg-color);
+    min-width: 0;
+    overflow: hidden;
+}
+
+.editor-area.split {
+    gap: 1px;
+    background-color: var(--border-color); /* Separator color */
+}
+
+.pane-container {
+    flex: 1;
+    display: flex;
     flex-direction: column;
     background-color: var(--bg-color);
     min-width: 0;
     overflow: hidden;
+}
+
+.pane-container.focused {
+    z-index: 10;
+    /* Optional: display a subtle highlight or shadow for focused pane */
 }
 
 .editor-content {
@@ -21,7 +40,9 @@
     padding: 0;
     overflow: hidden;
     position: relative;
+    border-top: 1px solid var(--border-color);
 }
+
 
 .layout-footer {
     position: fixed;

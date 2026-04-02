@@ -12,21 +12,29 @@ interface EditorProps {
 export const Editor: React.FC<EditorProps> = ({ pane }) => {
     const { 
         openDocuments,
-        activeLeftPath,
-        activeRightPath,
+        activeLeftItem,
+        activeRightItem,
         setActivePane,
         setContent, 
         saveFile 
     } = useDocument();
 
-    const activeDocumentPath = pane === 'left' ? activeLeftPath : activeRightPath;
-    const activeDocument = openDocuments.find(doc => doc.path === activeDocumentPath) || null;
+    const activeItem = pane === 'left' ? activeLeftItem : activeRightItem;
+    const activeDocument = openDocuments.find(doc => doc.path === activeItem?.path) || null;
+    const activeFilePath = activeItem?.path || null;
+
+    const viewType = React.useMemo(() => {
+        if (!activeItem || !activeDocument) return 'none';
+        if (activeItem.isPreview) {
+            return pane === 'left' ? activeDocument.leftPreviewView : activeDocument.rightPreviewView;
+        }
+        return pane === 'left' ? activeDocument.leftMainView : activeDocument.rightMainView;
+    }, [activeItem, activeDocument, pane]);
     const content = activeDocument?.content || '';
     const { theme } = useTheme();
     const saveFileRef = React.useRef(saveFile);
     const editorRef = React.useRef<any>(null);
     const decorationsRef = React.useRef<string[]>([]);
-    const activeFilePath = activeDocumentPath;
 
     // Update ref when saveFile changes
     React.useEffect(() => {
@@ -173,7 +181,7 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         }
     };
 
-    if (!activeFilePath) {
+    if (viewType === 'none' || !activeFilePath) {
         return (
             <div className="editor-empty">
                 <p>ファイルを選択して編集を開始してください</p>
@@ -181,10 +189,28 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         );
     }
 
+    if (viewType !== 'editor') {
+        const viewNames: Record<string, string> = {
+            'canvas': 'キャンバス',
+            'reader': 'リーダー',
+            'preview': 'プレビュー'
+        };
+
+        return (
+            <div className="view-placeholder">
+                <div className="placeholder-content">
+                    <h2>{viewNames[viewType] || viewType} View</h2>
+                    <p>現在、{viewNames[viewType] || viewType} 表示機能は開発中です。</p>
+                    <div className="path-display">{activeFilePath}</div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="editor-container">
             <MonacoEditor
-                key={activeFilePath}
+                key={`${activeFilePath}-${activeItem?.isPreview ? 'preview' : 'main'}`}
                 height="100%"
                 language={getLanguage(activeDocument?.documentType, activeFilePath)}
                 theme={theme === 'dark' ? 'novelaid-dark' : 'novelaid-light'}

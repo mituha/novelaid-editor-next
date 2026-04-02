@@ -11,8 +11,8 @@ interface DocumentTabsProps {
 export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
     const { 
         openDocuments, 
-        activeLeftPath, 
-        activeRightPath,
+        activeLeftItem, 
+        activeRightItem,
         switchDocument, 
         closeDocument, 
         toggleSplit,
@@ -21,12 +21,22 @@ export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
         setActivePane
     } = useDocument();
 
-    const activeDocumentPath = pane === 'left' ? activeLeftPath : activeRightPath;
-    const filteredDocuments = openDocuments.filter(doc => 
-        pane === 'left' ? doc.isInLeft : doc.isInRight
-    );
+    const activeItem = pane === 'left' ? activeLeftItem : activeRightItem;
+    
+    const tabItems = openDocuments.reduce((acc, doc) => {
+        const mainView = pane === 'left' ? doc.leftMainView : doc.rightMainView;
+        const previewView = pane === 'left' ? doc.leftPreviewView : doc.rightPreviewView;
+        
+        if (mainView !== 'none') {
+            acc.push({ path: doc.path, isPreview: false, documentType: doc.documentType, isDirty: doc.isDirty });
+        }
+        if (previewView !== 'none') {
+            acc.push({ path: doc.path, isPreview: true, documentType: doc.documentType, isDirty: doc.isDirty });
+        }
+        return acc;
+    }, [] as any[]);
 
-    if (filteredDocuments.length === 0 && !isSplit) {
+    if (tabItems.length === 0 && !isSplit) {
         return null;
     }
 
@@ -37,29 +47,30 @@ export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
     return (
         <div className={`document-tabs ${isSplit && activePane === pane ? 'focused' : ''}`}>
             <div className="tabs-container">
-                {filteredDocuments.map((doc) => {
-                    const isActive = doc.path === activeDocumentPath;
-                    const fileName = getFileName(doc.path);
+                {tabItems.map((item) => {
+                    const isActive = item.path === activeItem?.path && item.isPreview === activeItem?.isPreview;
+                    const fileName = getFileName(item.path) + (item.isPreview ? ' (Preview)' : '');
+                    const key = `${item.path}-${item.isPreview ? 'preview' : 'main'}`;
 
                     return (
                         <div
-                            key={doc.path}
-                            className={`document-tab ${isActive ? 'active' : ''} ${doc.isDirty ? 'dirty' : ''}`}
+                            key={key}
+                            className={`document-tab ${isActive ? 'active' : ''} ${item.isDirty && !item.isPreview ? 'dirty' : ''}`}
                             onClick={() => {
-                                switchDocument(doc.path, pane);
+                                switchDocument(item.path, pane, item.isPreview);
                                 setActivePane(pane);
                             }}
-                            title={doc.path}
+                            title={item.path}
                         >
                             <DocumentIcon
-                                type={doc.documentType}
+                                type={item. documentType}
                                 isFolder={false}
                                 size={14}
                                 className="tab-icon"
                             />
                             <span className="tab-title">{fileName}</span>
                             
-                            {doc.isDirty && (
+                            {item.isDirty && !item.isPreview && (
                                 <div className="dirty-indicator" title="未保存の変更があります" />
                             )}
                             
@@ -67,7 +78,7 @@ export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
                                 className="tab-close"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    closeDocument(doc.path, pane);
+                                    closeDocument(item.path, pane, item.isPreview);
                                 }}
                                 title="閉じる"
                             >

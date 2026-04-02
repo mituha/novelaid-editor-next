@@ -13,3 +13,11 @@
     font-size: 1.1rem;
     background-color: var(--bg-primary);
 }
+
+/* 全角スペース可視化用のスタイル */
+.monaco-full-width-space {
+    background-color: rgba(128, 128, 128, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(128, 128, 128, 0.3);
+    border-radius: 2px;
+    width: 1em !important;
+}

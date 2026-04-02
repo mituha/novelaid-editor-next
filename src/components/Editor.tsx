@@ -1,18 +1,47 @@
 import React from 'react';
-import MonacoEditor, { OnMount } from '@monaco-editor/react';
+import MonacoEditor, { OnMount, Monaco } from '@monaco-editor/react';
 import { useDocument } from '../contexts/DocumentContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
 import './Editor.css';
 
 export const Editor: React.FC = () => {
-    const { activeFilePath, content, setContent, saveFile } = useDocument();
+    const { activeDocument, content, setContent, saveFile } = useDocument();
     const { theme } = useTheme();
     const saveFileRef = React.useRef(saveFile);
+    const editorRef = React.useRef<any>(null);
+    const decorationsRef = React.useRef<string[]>([]);
+    const activeFilePath = activeDocument?.path || null;
 
     // Update ref when saveFile changes
     React.useEffect(() => {
         saveFileRef.current = saveFile;
     }, [saveFile]);
+
+    // 全角スペースの可視化更新
+    const updateDecorations = React.useCallback((editor: any, monaco: Monaco) => {
+        const model = editor.getModel();
+        if (!model) return;
+
+        const decorations: any[] = [];
+        const content = model.getValue();
+        const regex = /\u3000/g;
+        let match;
+
+        while ((match = regex.exec(content)) !== null) {
+            const startPos = model.getPositionAt(match.index);
+            const endPos = model.getPositionAt(match.index + 1);
+            decorations.push({
+                range: new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column),
+                options: {
+                    inlineClassName: 'monaco-full-width-space',
+                    stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
+                }
+            });
+        }
+
+        decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
+    }, []);
 
     const handleEditorChange = (value: string | undefined) => {
         if (value !== undefined) {
@@ -21,19 +50,99 @@ export const Editor: React.FC = () => {
     };
 
     const handleEditorMount: OnMount = (editor, monaco) => {
+        editorRef.current = editor;
+        decorationsRef.current = []; // 前のエディタインスタンスのデコレーションIDをクリア
+        
+        // 言語登録
+        registerNovelLanguage(monaco);
+        
+        // テーマ登録
+        defineThemes(monaco);
+
+        // 初回デコレーション
+        updateDecorations(editor, monaco);
+
+        // 内容変更時のデコレーション更新
+        editor.onDidChangeModelContent(() => {
+            updateDecorations(editor, monaco);
+        });
+
         // Add save command (Ctrl+S)
         editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
             saveFileRef.current();
         });
     };
 
-    // Determine language from file extension
-    const getLanguage = (path: string | null) => {
-        if (!path) return 'markdown';
+    // novel言語の登録と定義
+    const registerNovelLanguage = (monaco: Monaco) => {
+        const languages = monaco.languages.getLanguages();
+        if (languages.some((lang: any) => lang.id === 'novel')) return;
+
+        monaco.languages.register({ id: 'novel' });
+        monaco.languages.setMonarchTokensProvider('novel', {
+            tokenizer: {
+                root: [
+                    // 台詞: 「 」『 』
+                    [/「[^」]*」/, 'novel.dialogue'],
+                    [/『[^』]*』/, 'novel.dialogue'],
+                    
+                    // ルビ・傍記 (カクヨム記法準拠)
+                    // |文字《るび》
+                    [/\|[^《]*《[^》]*》/, 'novel.ruby'],
+                    // 漢字《るび》
+                    [/[\u4E00-\u9FFF]+《[^》]*》/, 'novel.ruby'],
+                    // 《《傍点》》
+                    [/《《[^》]*》》/, 'novel.emphasis'],
+                ]
+            }
+        });
+    };
+
+    // カスタムテーマの定義
+    const defineThemes = (monaco: Monaco) => {
+        monaco.editor.defineTheme('novelaid-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [
+                { token: 'novel.dialogue', foreground: 'A8FFB3' }, // 明るい緑
+                { token: 'novel.ruby', foreground: '80CBC4', fontStyle: 'italic' },
+                { token: 'novel.emphasis', foreground: 'FFAB91', fontStyle: 'bold' },
+            ],
+            colors: {}
+        });
+
+        monaco.editor.defineTheme('novelaid-light', {
+            base: 'vs',
+            inherit: true,
+            rules: [
+                { token: 'novel.dialogue', foreground: '2E7D32' }, // 濃い緑
+                { token: 'novel.ruby', foreground: '00695C', fontStyle: 'italic' },
+                { token: 'novel.emphasis', foreground: 'D84315', fontStyle: 'bold' },
+            ],
+            colors: {}
+        });
+    };
+
+    // Determine language from documentType or file extension
+    const getLanguage = (documentType: NovelaidDocumentType | undefined, path: string | null) => {
+        // 1. DocumentTypeを最優先
+        if (documentType) {
+            switch (documentType) {
+                case 'novel': return 'novel';
+                case 'markdown': return 'markdown';
+                case 'css': return 'css';
+                case 'gitDiff': return 'diff';
+                case 'browser': return 'html';
+                case 'chat': return 'json';
+            }
+        }
+
+        // 2. 拡張子による補助判定
+        if (!path) return 'plaintext';
         const ext = path.split('.').pop()?.toLowerCase();
         switch (ext) {
             case 'js': return 'javascript';
-            case 'ts': return 'typescript';
+            case 'ts':
             case 'tsx': return 'typescript';
             case 'json': return 'json';
             case 'css': return 'css';
@@ -56,8 +165,8 @@ export const Editor: React.FC = () => {
             <MonacoEditor
                 key={activeFilePath}
                 height="100%"
-                language={getLanguage(activeFilePath)}
-                theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                language={getLanguage(activeDocument?.documentType, activeFilePath)}
+                theme={theme === 'dark' ? 'novelaid-dark' : 'novelaid-light'}
                 value={content}
                 onChange={handleEditorChange}
                 onMount={handleEditorMount}
@@ -68,7 +177,12 @@ export const Editor: React.FC = () => {
                     automaticLayout: true,
                     tabSize: 4,
                     scrollBeyondLastLine: false,
-                    renderWhitespace: 'selection',
+                    renderWhitespace: 'all',
+                    renderControlCharacters: true,
+                    unicodeHighlight: {
+                        ambiguousCharacters: false,
+                        invisibleCharacters: false,
+                    }
                 }}
             />
         </div>

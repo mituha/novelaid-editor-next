@@ -36,7 +36,7 @@
 * [05. エディター](https://note.com/mituha/n/nda5edc1850b5)
 * [06. 実行ファイルの作成](https://note.com/mituha/n/n6fa5f1496cbd)
 * [07. Appを見てみよう](https://note.com/mituha/n/n8be096721db2)
-* [08. ファイルの種類](https://note.com/mituha/n/n4583ca6a36f3)
+* [08. ファイルの種類とアイコン](https://note.com/mituha/n/n4583ca6a36f3)
 * [09. バックエンド](https://note.com/mituha/n/nfc780c6e2c8d)
 
 # リポジトリ

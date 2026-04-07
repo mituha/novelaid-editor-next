@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { readDocument, writeDocument, NovelaidDocument, NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
-import { DocumentViewType } from '../types/document';
+import { DocumentViewMode } from '../types/document';
 
 export interface DocumentState {
     path: string;
@@ -9,10 +9,10 @@ export interface DocumentState {
     documentType: NovelaidDocumentType;
     isDirty: boolean;
     // 各ペイン・各スロット（メイン/プレビュー）の表示状態。'none'ならタブが表示されない。
-    leftMainView: DocumentViewType;
-    rightMainView: DocumentViewType;
-    leftPreviewView: DocumentViewType;
-    rightPreviewView: DocumentViewType;
+    leftMainView: DocumentViewMode;
+    rightMainView: DocumentViewMode;
+    leftPreviewView: DocumentViewMode;
+    rightPreviewView: DocumentViewMode;
 }
 
 export interface TabItem {
@@ -27,20 +27,20 @@ interface DocumentContextType {
     isSplit: boolean;
     activePane: 'left' | 'right';
     splitRatio: number; // 0 to 1
-    
+
     openDocument: (path: string, pane?: 'left' | 'right', asPreview?: boolean) => Promise<void>;
     closeDocument: (path: string, pane: 'left' | 'right', isPreview: boolean) => void;
     switchDocument: (path: string, pane: 'left' | 'right', isPreview: boolean) => void;
     saveDocument: (path?: string) => Promise<void>;
     setContent: (content: string, path?: string) => void;
     setMetadata: (metadata: Record<string, any>, path?: string) => void;
-    changeViewType: (path: string, pane: 'left' | 'right', viewType: DocumentViewType, isPreview: boolean) => void;
+    changeViewMode: (path: string, pane: 'left' | 'right', viewMode: DocumentViewMode, isPreview: boolean) => void;
     toggleSplit: () => void;
     setActivePane: (pane: 'left' | 'right') => void;
     setSplitRatio: (ratio: number) => void;
-    
+
     // Legacy support or simplified access for current active
-    activeFilePath: string | null; 
+    activeFilePath: string | null;
     activeItem: TabItem | null;
     content: string;
     metadata: Record<string, any>;
@@ -76,20 +76,20 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const openDocument = useCallback(async (path: string, pane?: 'left' | 'right', asPreview: boolean = false) => {
         const targetPane = pane || activePane;
-        const viewProp = asPreview 
+        const viewProp = asPreview
             ? (targetPane === 'left' ? 'leftPreviewView' : 'rightPreviewView')
             : (targetPane === 'left' ? 'leftMainView' : 'rightMainView');
-        const defaultView: DocumentViewType = asPreview ? 'preview' : 'editor';
-        
+        const defaultView: DocumentViewMode = asPreview ? 'preview' : 'editor';
+
         // If already open anywhere, update flags
         const existingDoc = openDocuments.find(doc => doc.path === path);
         if (existingDoc) {
-            setOpenDocuments(prev => prev.map(doc => 
-                doc.path === path 
+            setOpenDocuments(prev => prev.map(doc =>
+                doc.path === path
                     ? { ...doc, [viewProp]: doc[viewProp] === 'none' ? defaultView : doc[viewProp] }
                     : doc
             ));
-            
+
             const newItem = { path, isPreview: asPreview };
             if (targetPane === 'left') {
                 setActiveLeftItem(newItem);
@@ -115,7 +115,7 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 [viewProp]: defaultView
             };
             setOpenDocuments(prev => [...prev, newState]);
-            
+
             const newItem = { path, isPreview: asPreview };
             if (targetPane === 'left') {
                 setActiveLeftItem(newItem);
@@ -129,7 +129,7 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, [openDocuments, activePane]);
 
     const closeDocument = useCallback((path: string, pane: 'left' | 'right', isPreview: boolean) => {
-        const viewProp = isPreview 
+        const viewProp = isPreview
             ? (pane === 'left' ? 'leftPreviewView' : 'rightPreviewView')
             : (pane === 'left' ? 'leftMainView' : 'rightMainView');
 
@@ -137,13 +137,13 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             const doc = prev.find(d => d.path === path);
             if (!doc) return prev;
 
-            const updatedDoc = { ...doc, [viewProp]: 'none' as DocumentViewType };
-            const isCompletelyClosed = 
-                updatedDoc.leftMainView === 'none' && 
-                updatedDoc.rightMainView === 'none' && 
-                updatedDoc.leftPreviewView === 'none' && 
+            const updatedDoc = { ...doc, [viewProp]: 'none' as DocumentViewMode };
+            const isCompletelyClosed =
+                updatedDoc.leftMainView === 'none' &&
+                updatedDoc.rightMainView === 'none' &&
+                updatedDoc.leftPreviewView === 'none' &&
                 updatedDoc.rightPreviewView === 'none';
-            
+
             if (isCompletelyClosed) {
                 return prev.filter(d => d.path !== path);
             } else {
@@ -190,19 +190,19 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setActivePane(pane);
     }, []);
 
-    const changeViewType = useCallback((path: string, pane: 'left' | 'right', viewType: DocumentViewType, isPreview: boolean) => {
-        const viewProp = isPreview 
+    const changeViewMode = useCallback((path: string, pane: 'left' | 'right', viewMode: DocumentViewMode, isPreview: boolean) => {
+        const viewProp = isPreview
             ? (pane === 'left' ? 'leftPreviewView' : 'rightPreviewView')
             : (pane === 'left' ? 'leftMainView' : 'rightMainView');
-        
-        setOpenDocuments(prev => prev.map(doc => 
-            doc.path === path ? { ...doc, [viewProp]: viewType } : doc
+
+        setOpenDocuments(prev => prev.map(doc =>
+            doc.path === path ? { ...doc, [viewProp]: viewMode } : doc
         ));
     }, []);
 
     const toggleSplit = useCallback(() => {
         const nextSplit = !isSplit;
-        
+
         if (nextSplit) {
             // Opening split: current left document should also be in right
             if (activeLeftItem) {
@@ -222,16 +222,16 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             // Closing split: clear all right views
             setOpenDocuments(docs => docs.map(doc => ({
                 ...doc,
-                rightMainView: 'none' as DocumentViewType,
-                rightPreviewView: 'none' as DocumentViewType
-            })).filter(doc => 
+                rightMainView: 'none' as DocumentViewMode,
+                rightPreviewView: 'none' as DocumentViewMode
+            })).filter(doc =>
                 doc.leftMainView !== 'none' || doc.leftPreviewView !== 'none'
             ));
 
             setActiveRightItem(null);
             setActivePane('left');
         }
-        
+
         setIsSplit(nextSplit);
     }, [isSplit, activeLeftItem]);
 
@@ -243,7 +243,7 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const targetPath = path || activeItem?.path;
         if (!targetPath) return;
 
-        setOpenDocuments(prev => prev.map(doc => 
+        setOpenDocuments(prev => prev.map(doc =>
             doc.path === targetPath ? { ...doc, content: newContent, isDirty: true } : doc
         ));
     }, [activeItem]);
@@ -252,7 +252,7 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const targetPath = path || activeItem?.path;
         if (!targetPath) return;
 
-        setOpenDocuments(prev => prev.map(doc => 
+        setOpenDocuments(prev => prev.map(doc =>
             doc.path === targetPath ? { ...doc, metadata: newMetadata, isDirty: true } : doc
         ));
     }, [activeItem]);
@@ -269,8 +269,8 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 documentType: docToSave.documentType
             };
             await writeDocument(targetPath, novelaidDoc);
-            
-            setOpenDocuments(prev => prev.map(doc => 
+
+            setOpenDocuments(prev => prev.map(doc =>
                 doc.path === targetPath ? { ...doc, isDirty: false } : doc
             ));
         } catch (error) {
@@ -290,12 +290,12 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         saveDocument,
         setContent,
         setMetadata,
-        changeViewType,
+        changeViewMode: changeViewMode,
         toggleSplit,
         setActivePane,
         splitRatio,
         setSplitRatio: handleSetSplitRatio,
-        
+
         // Legacy/Simplified interface
         activeFilePath: activeItem?.path || null,
         activeItem,

@@ -10,20 +10,20 @@ interface EditorProps {
 }
 
 export const Editor: React.FC<EditorProps> = ({ pane }) => {
-    const { 
+    const {
         openDocuments,
         activeLeftItem,
         activeRightItem,
         setActivePane,
-        setContent, 
-        saveFile 
+        setContent,
+        saveFile
     } = useDocument();
 
     const activeItem = pane === 'left' ? activeLeftItem : activeRightItem;
     const activeDocument = openDocuments.find(doc => doc.path === activeItem?.path) || null;
     const activeFilePath = activeItem?.path || null;
 
-    const viewType = React.useMemo(() => {
+    const viewMode = React.useMemo(() => {
         if (!activeItem || !activeDocument) return 'none';
         if (activeItem.isPreview) {
             return pane === 'left' ? activeDocument.leftPreviewView : activeDocument.rightPreviewView;
@@ -81,10 +81,10 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         });
 
         decorationsRef.current = []; // 前のエディタインスタンスのデコレーションIDをクリア
-        
+
         // 言語登録
         registerNovelLanguage(monaco);
-        
+
         // テーマ登録
         defineThemes(monaco);
 
@@ -114,7 +114,7 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
                     // 台詞: 「 」『 』
                     [/「[^」]*」/, 'novel.dialogue'],
                     [/『[^』]*』/, 'novel.dialogue'],
-                    
+
                     // ルビ・傍記 (カクヨム記法準拠)
                     // |文字《るび》
                     [/\|[^《]*《[^》]*》/, 'novel.ruby'],
@@ -181,7 +181,7 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         }
     };
 
-    if (viewType === 'none' || !activeFilePath) {
+    if (viewMode === 'none' || !activeFilePath) {
         return (
             <div className="editor-empty">
                 <p>ファイルを選択して編集を開始してください</p>
@@ -189,7 +189,7 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         );
     }
 
-    if (viewType !== 'editor') {
+    if (viewMode !== 'editor') {
         const viewNames: Record<string, string> = {
             'canvas': 'キャンバス',
             'reader': 'リーダー',
@@ -199,8 +199,8 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         return (
             <div className="view-placeholder">
                 <div className="placeholder-content">
-                    <h2>{viewNames[viewType] || viewType} View</h2>
-                    <p>現在、{viewNames[viewType] || viewType} 表示機能は開発中です。</p>
+                    <h2>{viewNames[viewMode] || viewMode} View</h2>
+                    <p>現在、{viewNames[viewMode] || viewMode} 表示機能は開発中です。</p>
                     <div className="path-display">{activeFilePath}</div>
                 </div>
             </div>

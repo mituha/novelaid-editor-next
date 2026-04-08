@@ -21,23 +21,31 @@ fn read_dir_recursive(
     let dir = std::fs::read_dir(path)?;
     for entry in dir {
         let entry = entry?;
+        let path_buf = entry.path();
         let file_type = entry.file_type()?;
         let is_directory = file_type.is_dir();
-        let file_name = entry.file_name().to_string_lossy().to_string();
+        let name = entry.file_name().to_string_lossy().to_string();
         let document_type = if is_directory {
-            get_directory_type(file_name.clone(), parent_type)
+            get_directory_type(name.clone(), parent_type)
         } else {
-            get_document_type(file_name.clone())
+            get_document_type(name.clone())
         };
 
+        let path = path_buf.to_string_lossy().to_string();
+        let base_name = path_buf.file_name().unwrap_or_default().to_string_lossy().to_string();
+        let file_title = path_buf.file_stem().unwrap_or_default().to_string_lossy().to_string();
+
         let children = if is_directory && recursive {
-            Some(read_dir_recursive(&entry.path(), true, Some(document_type))?)
+            Some(read_dir_recursive(&path_buf, true, Some(document_type))?)
         } else {
             None
         };
 
         entries.push(NovelaidDirEntry {
-            name: file_name,
+            name,
+            path,
+            base_name,
+            file_title,
             is_directory,
             document_type,
             children,

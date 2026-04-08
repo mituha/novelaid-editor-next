@@ -105,15 +105,10 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         try {
             const doc = await readDocument(path);
             
-            // パスからファイル名と拡張子なしタイトルを抽出
-            const baseName = path.split(/[/\\]/).pop() || '';
-            const lastDotIndex = baseName.lastIndexOf('.');
-            const fileTitle = lastDotIndex === -1 ? baseName : baseName.substring(0, lastDotIndex);
-
             const newState: DocumentState = {
-                path,
-                baseName,
-                fileTitle,
+                path: doc.path,
+                baseName: doc.baseName,
+                fileTitle: doc.fileTitle,
                 content: doc.content,
                 metadata: doc.metadata || {},
                 documentType: doc.documentType,
@@ -274,6 +269,9 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
         try {
             const novelaidDoc: NovelaidDocument = {
+                path: docToSave.path,
+                baseName: docToSave.baseName,
+                fileTitle: docToSave.fileTitle,
                 content: docToSave.content,
                 metadata: docToSave.metadata,
                 documentType: docToSave.documentType

@@ -21,6 +21,9 @@ pub enum NovelaidDocumentType {
 #[serde(rename_all = "camelCase")]
 pub struct NovelaidDirEntry {
     pub name: String,
+    pub path: String,
+    pub base_name: String,
+    pub file_title: String,
     pub is_directory: bool,
     pub document_type: NovelaidDocumentType,
     pub children: Option<Vec<NovelaidDirEntry>>,
@@ -30,6 +33,9 @@ pub struct NovelaidDirEntry {
 #[ts(export, export_to = "../guest-js/models.ts")]
 #[serde(rename_all = "camelCase")]
 pub struct NovelaidDocument {
+    pub path: String,
+    pub base_name: String,
+    pub file_title: String,
     pub content: String,
     #[ts(type = "any")]
     pub metadata: serde_json::Value,

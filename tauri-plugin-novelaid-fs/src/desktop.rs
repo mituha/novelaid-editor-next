@@ -63,6 +63,9 @@ impl<R: Runtime> NovelaidFs<R> {
     }
 
     Ok(NovelaidDocument {
+      path: path.to_string_lossy().to_string(),
+      base_name: path.file_name().unwrap_or_default().to_string_lossy().to_string(),
+      file_title: path.file_stem().unwrap_or_default().to_string_lossy().to_string(),
       content: body.to_string(),
       metadata,
       document_type,

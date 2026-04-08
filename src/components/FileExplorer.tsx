@@ -33,21 +33,20 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
         try {
             const entries = await readDirectory(path, recursive, parentType);
 
-            const processEntries = (entries: NovelaidDirEntry[], currentPath: string): FileNode[] => {
+            const processEntries = (entries: NovelaidDirEntry[]): FileNode[] => {
                 return entries.map(entry => {
-                    const nodePath = `${currentPath}/${entry.name}`;
                     return {
                         name: entry.name,
-                        path: nodePath,
+                        path: entry.path,
                         isDirectory: entry.isDirectory,
                         isOpen: false,
-                        children: entry.children ? processEntries(entry.children, nodePath) : (entry.isDirectory ? [] : undefined),
+                        children: entry.children ? processEntries(entry.children) : (entry.isDirectory ? [] : undefined),
                         documentType: entry.documentType
                     };
                 });
             };
 
-            return processEntries(entries, path);
+            return processEntries(entries);
         } catch (err) {
             console.error('Failed to read directory:', err);
             throw err;

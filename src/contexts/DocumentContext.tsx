@@ -4,6 +4,8 @@ import { DocumentViewMode } from '../types/document';
 
 export interface DocumentState {
     path: string;
+    baseName: string;   // 拡張子ありファイル名
+    fileTitle: string;  // 拡張子なしファイルタイトル
     content: string;
     metadata: Record<string, any>;
     documentType: NovelaidDocumentType;
@@ -102,8 +104,16 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
         try {
             const doc = await readDocument(path);
+            
+            // パスからファイル名と拡張子なしタイトルを抽出
+            const baseName = path.split(/[/\\]/).pop() || '';
+            const lastDotIndex = baseName.lastIndexOf('.');
+            const fileTitle = lastDotIndex === -1 ? baseName : baseName.substring(0, lastDotIndex);
+
             const newState: DocumentState = {
                 path,
+                baseName,
+                fileTitle,
                 content: doc.content,
                 metadata: doc.metadata || {},
                 documentType: doc.documentType,

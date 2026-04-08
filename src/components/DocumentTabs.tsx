@@ -28,10 +28,24 @@ export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
         const previewView = pane === 'left' ? doc.leftPreviewView : doc.rightPreviewView;
         
         if (mainView !== 'none') {
-            acc.push({ path: doc.path, isPreview: false, documentType: doc.documentType, isDirty: doc.isDirty });
+            acc.push({ 
+                path: doc.path, 
+                baseName: doc.baseName,
+                fileTitle: doc.fileTitle,
+                isPreview: false, 
+                documentType: doc.documentType, 
+                isDirty: doc.isDirty 
+            });
         }
         if (previewView !== 'none') {
-            acc.push({ path: doc.path, isPreview: true, documentType: doc.documentType, isDirty: doc.isDirty });
+            acc.push({ 
+                path: doc.path, 
+                baseName: doc.baseName,
+                fileTitle: doc.fileTitle,
+                isPreview: true, 
+                documentType: doc.documentType, 
+                isDirty: doc.isDirty 
+            });
         }
         return acc;
     }, [] as any[]);
@@ -40,16 +54,13 @@ export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
         return null;
     }
 
-    const getFileName = (path: string) => {
-        return path.split('/').pop() || path;
-    };
 
     return (
         <div className={`document-tabs ${isSplit && activePane === pane ? 'focused' : ''}`}>
             <div className="tabs-container">
                 {tabItems.map((item) => {
                     const isActive = item.path === activeItem?.path && item.isPreview === activeItem?.isPreview;
-                    const fileName = getFileName(item.path) + (item.isPreview ? ' (Preview)' : '');
+                    const fileName = item.baseName + (item.isPreview ? ' (Preview)' : '');
                     const key = `${item.path}-${item.isPreview ? 'preview' : 'main'}`;
 
                     return (

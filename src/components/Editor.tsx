@@ -153,7 +153,7 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
     };
 
     // Determine language from documentType or file extension
-    const getLanguage = (documentType: NovelaidDocumentType | undefined, path: string | null) => {
+    const getLanguage = (documentType: NovelaidDocumentType | undefined, baseName: string | undefined) => {
         // 1. DocumentTypeを最優先
         if (documentType) {
             switch (documentType) {
@@ -167,8 +167,8 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         }
 
         // 2. 拡張子による補助判定
-        if (!path) return 'plaintext';
-        const ext = path.split('.').pop()?.toLowerCase();
+        if (!baseName) return 'plaintext';
+        const ext = baseName.split('.').pop()?.toLowerCase();
         switch (ext) {
             case 'js': return 'javascript';
             case 'ts':
@@ -212,7 +212,7 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
             <MonacoEditor
                 key={`${activeFilePath}-${activeItem?.isPreview ? 'preview' : 'main'}`}
                 height="100%"
-                language={getLanguage(activeDocument?.documentType, activeFilePath)}
+                language={getLanguage(activeDocument?.documentType, activeDocument?.baseName)}
                 theme={theme === 'dark' ? 'novelaid-dark' : 'novelaid-light'}
                 value={content}
                 onChange={handleEditorChange}

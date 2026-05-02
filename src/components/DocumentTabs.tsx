@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Columns2 } from 'lucide-react';
+import { X, Columns2, Eye } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
 import { DocumentIcon } from './DocumentIcon';
 import './DocumentTabs.css';
@@ -18,7 +18,8 @@ export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
         toggleSplit,
         isSplit,
         activePane,
-        setActivePane
+        setActivePane,
+        openDocument
     } = useDocument();
 
     const activeItem = pane === 'left' ? activeLeftItem : activeRightItem;
@@ -110,6 +111,24 @@ export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
                 >
                     <Columns2 size={16} />
                 </button>
+                {activeItem && !activeItem.isPreview && (
+                    <button
+                        className="action-button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isSplit) {
+                                toggleSplit();
+                                openDocument(activeItem.path, 'right', true);
+                            } else {
+                                const targetPane = pane === 'left' ? 'right' : 'left';
+                                openDocument(activeItem.path, targetPane, true);
+                            }
+                        }}
+                        title="プレビューを表示"
+                    >
+                        <Eye size={16} />
+                    </button>
+                )}
             </div>
         </div>
     );

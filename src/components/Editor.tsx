@@ -3,6 +3,7 @@ import MonacoEditor, { OnMount, Monaco } from '@monaco-editor/react';
 import { useDocument } from '../contexts/DocumentContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
+import { MarkdownPreview } from './MarkdownPreview';
 import './Editor.css';
 
 interface EditorProps {
@@ -187,6 +188,10 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
                 <p>ファイルを選択して編集を開始してください</p>
             </div>
         );
+    }
+
+    if (viewMode === 'preview') {
+        return <MarkdownPreview content={content} filePath={activeFilePath} />;
     }
 
     if (viewMode !== 'editor') {

@@ -1,0 +1,69 @@
+.markdown-preview-container {
+    height: 100%;
+    overflow-y: auto;
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.markdown-preview-content {
+    width: 100%;
+    max-width: 800px;
+    background-color: var(--bg-surface);
+    color: var(--text-color);
+    padding: 60px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    min-height: 100%;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+/* novelaid-markdownのルートクラスに対する調整 */
+.novelaid-markdown-root {
+    font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.8;
+    font-size: 16px;
+}
+
+/* ダークモード時の微調整 */
+:root[data-theme='dark'] .markdown-preview-content {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+}
+
+/* 小説向けのスタイル（ルビや傍点など）は novelaid-markdown が提供するが、
+   必要に応じてここで上書きや追加を行う */
+
+.novelaid-markdown-root h1, 
+.novelaid-markdown-root h2, 
+.novelaid-markdown-root h3 {
+    color: var(--text-color);
+    margin-top: 2em;
+    margin-bottom: 1em;
+    font-weight: 700;
+}
+
+.novelaid-markdown-root p {
+    margin-bottom: 1.5em;
+}
+
+/* スクロールバーのカスタマイズ */
+.markdown-preview-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.markdown-preview-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.markdown-preview-container::-webkit-scrollbar-thumb {
+    background: var(--bg-active);
+    border-radius: 5px;
+}
+
+.markdown-preview-container::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+}

@@ -5,6 +5,16 @@
 
 https://mituha.github.io/novelaid-editor-docs/
 
+## 開発環境
+
+```pwsh
+# アプリの起動
+npm run tauri dev
+
+# アプリのビルド、exeの作成
+npm run tauri build
+
+```
 
 
 # Tauri + React + Typescript

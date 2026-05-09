@@ -31,11 +31,6 @@ export const ChatPanel: React.FC = () => {
                     <Trash2 size={16} />
                 </button>
             </div>
-
-            <div className="chat-context-area">
-                <AiContextSelector />
-            </div>
-            
             
             <div className="message-list" ref={scrollRef}>
                 {messages.length === 0 && (
@@ -79,6 +74,9 @@ export const ChatPanel: React.FC = () => {
                     disabled={isGenerating}
                     placeholder="AI にメッセージを送信..."
                 />
+                <div className="chat-context-area">
+                    <AiContextSelector />
+                </div>
             </div>
         </div>
     );

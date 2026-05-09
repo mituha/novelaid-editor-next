@@ -38,6 +38,19 @@
     background-color: var(--bg-hover);
 }
 
+.file-node.file {
+    cursor: grab;
+}
+
+.file-node.dragging {
+    opacity: 0.5;
+    background-color: var(--bg-hover);
+}
+
+.file-node.file:active {
+    cursor: grabbing;
+}
+
 .file-node.file:hover {
     background-color: var(--accent-transparent);
 }
@@ -45,6 +58,7 @@
 .file-node.active {
     background-color: var(--accent-color);
     color: white;
+    user-select: none; /* アクティブ時は選択不要 */
 }
 
 .file-node.active .file-icon {

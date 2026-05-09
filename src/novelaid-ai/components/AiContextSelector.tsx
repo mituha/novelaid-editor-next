@@ -47,6 +47,7 @@ export const AiContextSelector: React.FC = () => {
 
     const onDragOver = (e: React.DragEvent) => {
         e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
         setIsDragOver(true);
     };
 
@@ -74,7 +75,12 @@ export const AiContextSelector: React.FC = () => {
         contextState.customPaths.length;
 
     return (
-        <div className="ai-context-selector">
+        <div 
+            className={`ai-context-selector ${isDragOver ? 'drag-over-global' : ''}`}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+        >
             <div className="ai-context-summary" onClick={() => setIsExpanded(!isExpanded)}>
                 <span className="expand-icon">
                     {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}

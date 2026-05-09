@@ -93,6 +93,22 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
     };
 
 
+    const handleDragStart = (e: React.DragEvent, node: FileNode) => {
+        if (node.isDirectory) return;
+        
+        e.dataTransfer.setData('text/plain', node.path);
+        e.dataTransfer.effectAllowed = 'all';
+        e.stopPropagation(); // 親要素への伝播を防止
+        
+        const target = e.currentTarget as HTMLElement;
+        target.classList.add('dragging');
+    };
+
+    const handleDragEnd = (e: React.DragEvent) => {
+        const target = e.currentTarget as HTMLElement;
+        target.classList.remove('dragging');
+    };
+
     const renderNode = (node: FileNode, depth = 0) => {
         const isDirectory = node.isDirectory;
         const ChevronIcon = isDirectory ? (node.isOpen ? ChevronDown : ChevronRight) : null;
@@ -103,6 +119,9 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
                     className={`file-node ${isDirectory ? 'directory' : 'file'} type-${node.documentType} ${activeFilePath === node.path ? 'active' : ''}`}
                     style={{ paddingLeft: `${depth * 12 + 8}px` }}
                     onClick={() => isDirectory ? toggleFolder(node) : openDocument(node.path)}
+                    draggable={!isDirectory}
+                    onDragStart={(e) => handleDragStart(e, node)}
+                    onDragEnd={handleDragEnd}
                 >
                     {ChevronIcon && <ChevronIcon size={14} className="folder-chevron" />}
                     {!ChevronIcon && <div className="chevron-spacer" />}

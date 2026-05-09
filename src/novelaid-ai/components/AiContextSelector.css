@@ -3,6 +3,12 @@
     border-radius: 6px;
     overflow: hidden;
     background-color: var(--bg-secondary);
+    transition: all 0.2s;
+}
+
+.ai-context-selector.drag-over-global {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 1px var(--accent-color);
 }
 
 .ai-context-summary {

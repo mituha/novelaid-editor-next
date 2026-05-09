@@ -5,6 +5,12 @@
 		},
 		{
 			"path": "../novelaid-editor-docs"
+		},
+		{
+			"path": "../novelaid-editor"
+		},
+		{
+			"path": "../../ReSTAR-AI/restar-ai-ts"
 		}
 	],
 	"settings": {}

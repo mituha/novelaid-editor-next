@@ -1,6 +1,9 @@
 import React from 'react';
 import { X, Sun, Moon, Monitor } from 'lucide-react';
 import { useTheme, Theme } from '../contexts/ThemeContext';
+import { useApp } from '../contexts/AppContext';
+import { AiSettings, AiProvider, ProviderSettings } from 'restar-ai';
+import 'restar-ai/index.css';
 import './SettingsModal.css';
 
 interface SettingsModalProps {
@@ -10,6 +13,7 @@ interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     const { theme, setTheme } = useTheme();
+    const { settings, updateSettings } = useApp();
 
     if (!isOpen) return null;
 
@@ -18,6 +22,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         { id: 'dark', label: 'ダーク', icon: <Moon size={20} /> },
         { id: 'system', label: 'システム', icon: <Monitor size={20} /> },
     ];
+
+    const handleAiProviderChange = (provider: AiProvider) => {
+        updateSettings({ aiProvider: provider });
+    };
+
+    const handleAiSettingsChange = (newProviderSettings: ProviderSettings) => {
+        const updatedAiSettings = {
+            ...settings.aiSettings,
+            [settings.aiProvider]: newProviderSettings
+        };
+        updateSettings({ aiSettings: updatedAiSettings });
+    };
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -43,6 +59,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                 </button>
                             ))}
                         </div>
+                    </section>
+
+                    <section className="setting-section">
+                        {settings.aiSettings && settings.aiProvider && (
+                            <AiSettings
+                                provider={settings.aiProvider}
+                                settings={settings.aiSettings[settings.aiProvider]}
+                                onProviderChange={handleAiProviderChange}
+                                onSettingsChange={handleAiSettingsChange}
+                            />
+                        )}
                     </section>
                 </div>
             </div>

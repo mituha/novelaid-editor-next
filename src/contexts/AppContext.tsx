@@ -24,13 +24,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [config, setConfig] = useState<AppConfig>({ name: 'novelaid-editor-next', version: '0.2.0' });
     const [settings, setSettings] = useState<AppSettings>({ 
         theme: 'system', 
-        language: 'ja',
-        aiProvider: 'gemini',
-        aiSettings: {
-            gemini: { apiKey: '', endpoint: '', model: 'gemini-2.0-flash' },
-            openai: { apiKey: '', endpoint: 'https://api.openai.com/v1', model: 'gpt-4o' },
-            lmstudio: { apiKey: '', endpoint: 'http://localhost:1234/v1', model: 'model-identifier' }
-        }
+        language: 'ja'
     });
     const [session, setSession] = useState<AppSession>({ lastProjectPath: null, lastOpenedFiles: [], recentProjects: [] });
     const [state, setState] = useState<AppState>({ windowSize: { width: 1200, height: 800 }, sidebarWidth: 260 });

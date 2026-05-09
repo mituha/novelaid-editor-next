@@ -1,5 +1,3 @@
-import { AiProvider, ProviderSettings } from 'restar-ai';
-
 export type Theme = 'light' | 'dark' | 'system';
 
 export interface AppConfig {
@@ -8,13 +6,9 @@ export interface AppConfig {
     // Semi-fixed values
 }
 
-export type AllProviderSettings = Record<AiProvider, ProviderSettings>;
-
 export interface AppSettings {
     theme: Theme;
     language: string;
-    aiProvider: AiProvider;
-    aiSettings: AllProviderSettings;
 }
 
 export interface ProjectItem {

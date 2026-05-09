@@ -7,6 +7,7 @@ import { AppProvider } from "./contexts/AppContext";
 import { ProjectProvider } from "./contexts/ProjectContext";
 import { DocumentProvider } from "./contexts/DocumentContext";
 import { PanelProvider } from "./contexts/PanelContext";
+import { AiProviderComponent } from "./novelaid-ai/contexts/AiContext";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <ThemeProvider>
           <DocumentProvider>
             <PanelProvider>
-              <App />
+              <AiProviderComponent>
+                <App />
+              </AiProviderComponent>
             </PanelProvider>
           </DocumentProvider>
         </ThemeProvider>

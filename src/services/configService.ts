@@ -12,13 +12,7 @@ const DEFAULT_APP_CONFIG: FullAppConfiguration = {
     config: { name: 'novelaid-editor-next', version: '0.1.0' },
     settings: { 
         theme: 'system', 
-        language: 'ja',
-        aiProvider: 'gemini',
-        aiSettings: {
-            gemini: { apiKey: '', endpoint: '', model: 'gemini-2.0-flash' },
-            openai: { apiKey: '', endpoint: 'https://api.openai.com/v1', model: 'gpt-4o' },
-            lmstudio: { apiKey: '', endpoint: 'http://localhost:1234/v1', model: 'model-identifier' }
-        }
+        language: 'ja'
     },
     session: { lastProjectPath: null, lastOpenedFiles: [], recentProjects: [] },
     state: { windowSize: { width: 1200, height: 800 }, sidebarWidth: 260 }

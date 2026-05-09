@@ -5,7 +5,9 @@ import { useProject } from '../contexts/ProjectContext';
 import './FileExplorer.css';
 
 import { DocumentIcon } from './DocumentIcon';
-import { NovelaidDocumentType, readDirectory, NovelaidDirEntry } from 'tauri-plugin-novelaid-fs-api';
+import { NovelaidDocumentType, readDirectory, NovelaidDirEntry, scanProjectMetadata } from 'tauri-plugin-novelaid-fs-api';
+import { rename, copyFile } from '@tauri-apps/plugin-fs';
+import { dirname, join, basename } from '@tauri-apps/api/path';
 
 interface FileExplorerProps {
     projectPath?: string;
@@ -23,10 +25,11 @@ interface FileNode {
 export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsProjectPath }) => {
     const { projectPath: contextProjectPath } = useProject();
     const projectPath = propsProjectPath || contextProjectPath || '未選択';
-    
+
     const [files, setFiles] = useState<FileNode[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [dragOverPath, setDragOverPath] = useState<string | null>(null);
     const { openDocument, activeFilePath } = useDocument();
 
     const loadFiles = async (path: string, parentType: NovelaidDocumentType = 'novel', recursive = false): Promise<FileNode[]> => {
@@ -94,12 +97,10 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
 
 
     const handleDragStart = (e: React.DragEvent, node: FileNode) => {
-        if (node.isDirectory) return;
-        
         e.dataTransfer.setData('text/plain', node.path);
         e.dataTransfer.effectAllowed = 'all';
-        e.stopPropagation(); // 親要素への伝播を防止
-        
+        e.stopPropagation();
+
         const target = e.currentTarget as HTMLElement;
         target.classList.add('dragging');
     };
@@ -107,6 +108,69 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
     const handleDragEnd = (e: React.DragEvent) => {
         const target = e.currentTarget as HTMLElement;
         target.classList.remove('dragging');
+        setDragOverPath(null);
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = e.ctrlKey ? 'copy' : 'move';
+    };
+
+    const handleDragEnter = (e: React.DragEvent, node: FileNode) => {
+        e.preventDefault();
+        setDragOverPath(node.path);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        // 親要素に戻った場合などにチラつくのを防ぐため、厳密な判定が必要な場合もあるが
+        // ここでは簡易的に直近の進入パスを保持する
+    };
+
+    const handleDrop = async (e: React.DragEvent, targetNode?: FileNode) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverPath(null);
+
+        const sourcePath = e.dataTransfer.getData('text/plain');
+        if (!sourcePath) return;
+
+        try {
+            let destDir: string;
+            if (targetNode) {
+                if (sourcePath === targetNode.path) return;
+                // ドロップ先がディレクトリでない場合は、その親ディレクトリをドロップ先とする
+                destDir = targetNode.isDirectory ? targetNode.path : await dirname(targetNode.path);
+            } else {
+                // コンテナ（ルート）へのドロップ
+                destDir = projectPath;
+            }
+
+            const fileName = await basename(sourcePath);
+            const destPath = await join(destDir, fileName);
+
+            if (sourcePath === destPath) return;
+
+            if (e.ctrlKey) {
+                // コピー
+                await copyFile(sourcePath, destPath);
+            } else {
+                // 移動
+                await rename(sourcePath, destPath);
+            }
+
+            // プロジェクトメタデータの再スキャン
+            await scanProjectMetadata();
+
+            // 表示の更新
+            if (projectPath && projectPath !== '未選択') {
+                const updatedFiles = await loadFiles(projectPath);
+                setFiles(updatedFiles);
+            }
+        } catch (err) {
+            console.error('D&D operation failed:', err);
+        }
     };
 
     const renderNode = (node: FileNode, depth = 0) => {
@@ -116,12 +180,16 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
         return (
             <div key={node.path}>
                 <div
-                    className={`file-node ${isDirectory ? 'directory' : 'file'} type-${node.documentType} ${activeFilePath === node.path ? 'active' : ''}`}
+                    className={`file-node ${isDirectory ? 'directory' : 'file'} type-${node.documentType} ${activeFilePath === node.path ? 'active' : ''} ${dragOverPath === node.path ? 'drop-target' : ''}`}
                     style={{ paddingLeft: `${depth * 12 + 8}px` }}
                     onClick={() => isDirectory ? toggleFolder(node) : openDocument(node.path)}
-                    draggable={!isDirectory}
+                    draggable
                     onDragStart={(e) => handleDragStart(e, node)}
                     onDragEnd={handleDragEnd}
+                    onDragOver={handleDragOver}
+                    onDragEnter={(e) => handleDragEnter(e, node)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, node)}
                 >
                     {ChevronIcon && <ChevronIcon size={14} className="folder-chevron" />}
                     {!ChevronIcon && <div className="chevron-spacer" />}
@@ -156,7 +224,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
     }
 
     return (
-        <div className="file-explorer">
+        <div className="file-explorer" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e)}>
             <div className="file-explorer-content">
                 {files.map((file: FileNode) => renderNode(file))}
             </div>

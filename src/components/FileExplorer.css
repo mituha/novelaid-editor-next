@@ -28,10 +28,11 @@
     display: flex;
     align-items: center;
     padding: 4px 8px;
-    cursor: pointer;
+    cursor: default;
     white-space: nowrap;
     user-select: none;
-    transition: background-color 0.1s;
+    transition: background-color 0.1s, border 0.1s;
+    border: 1px solid transparent;
 }
 
 .file-node:hover {
@@ -39,16 +40,18 @@
 }
 
 .file-node.file {
-    cursor: grab;
+    /* ファイルもデフォルトでは矢印カーソル */
 }
 
 .file-node.dragging {
     opacity: 0.5;
     background-color: var(--bg-hover);
+    cursor: grabbing;
 }
 
-.file-node.file:active {
-    cursor: grabbing;
+.file-node.drop-target {
+    background-color: var(--accent-transparent);
+    border: 1px dashed var(--accent-color);
 }
 
 .file-node.file:hover {

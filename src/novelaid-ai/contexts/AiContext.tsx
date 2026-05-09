@@ -1,12 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { AiProvider, ProviderSettings, AiModuleSettings, AllAiProviderSettings, AiDriver, createAiDriver } from '../types';
+import { AiProvider, ProviderSettings, AiModuleSettings, AllAiProviderSettings, AiDriver, createAiDriver, AiContextSettings } from '../types';
 import { ConfigService } from '../../services/configService';
+import { readDocument } from 'tauri-plugin-novelaid-fs-api';
+import { useDocument } from '../../contexts/DocumentContext';
 
 interface AiContextType {
     settings: AiModuleSettings;
     updateProvider: (provider: AiProvider) => Promise<void>;
     updateProviderSettings: (settings: ProviderSettings) => Promise<void>;
+    updateContextSettings: (settings: Partial<AiContextSettings>) => void;
+    addCustomPath: (path: string) => void;
+    removeCustomPath: (path: string) => void;
     getDriver: () => AiDriver;
+    getContextData: () => Promise<{ path: string; name: string; content: string }[]>;
     isLoading: boolean;
 }
 
@@ -18,6 +24,12 @@ const DEFAULT_AI_SETTINGS: AiModuleSettings = {
         gemini: { apiKey: '', endpoint: '', model: 'gemini-2.0-flash' },
         openai: { apiKey: '', endpoint: 'https://api.openai.com/v1', model: 'gpt-4o' },
         lmstudio: { apiKey: '', endpoint: 'http://localhost:1234/v1', model: 'model-identifier' }
+    },
+    context: {
+        includeActiveLeft: true,
+        includeActiveRight: false,
+        includeAllOpen: false,
+        customPaths: []
     }
 };
 
@@ -33,13 +45,14 @@ export const AiProviderComponent: React.FC<{ children: React.ReactNode }> = ({ c
             const appConfig = await ConfigService.loadAppConfig();
             const savedSettings = appConfig.settings as any;
             
-            if (savedSettings.aiProvider || savedSettings.aiSettings) {
+            if (savedSettings.aiProvider || savedSettings.aiSettings || savedSettings.aiContext) {
                 setSettings({
                     activeProvider: savedSettings.aiProvider || DEFAULT_AI_SETTINGS.activeProvider,
                     providers: {
                         ...DEFAULT_AI_SETTINGS.providers,
                         ...(savedSettings.aiSettings || {})
-                    }
+                    },
+                    context: savedSettings.aiContext || DEFAULT_AI_SETTINGS.context
                 });
             }
         } catch (error) {
@@ -62,7 +75,8 @@ export const AiProviderComponent: React.FC<{ children: React.ReactNode }> = ({ c
             const updatedAppSettings = {
                 ...appConfig.settings,
                 aiProvider: newSettings.activeProvider,
-                aiSettings: newSettings.providers
+                aiSettings: newSettings.providers,
+                aiContext: newSettings.context
             };
             await ConfigService.saveAppConfig('settings', updatedAppSettings);
         } catch (error) {
@@ -88,12 +102,74 @@ export const AiProviderComponent: React.FC<{ children: React.ReactNode }> = ({ c
         await saveSettings(newSettings);
     };
 
+    const updateContextSettings = useCallback((newContextSettings: Partial<AiContextSettings>) => {
+        const newSettings = {
+            ...settings,
+            context: { ...settings.context, ...newContextSettings }
+        };
+        setSettings(newSettings);
+        saveSettings(newSettings);
+    }, [settings]);
+
+    const addCustomPath = useCallback((path: string) => {
+        if (settings.context.customPaths.includes(path)) return;
+        updateContextSettings({
+            customPaths: [...settings.context.customPaths, path]
+        });
+    }, [settings.context.customPaths, updateContextSettings]);
+
+    const removeCustomPath = useCallback((path: string) => {
+        updateContextSettings({
+            customPaths: settings.context.customPaths.filter(p => p !== path)
+        });
+    }, [settings.context.customPaths, updateContextSettings]);
+
     const getDriver = useCallback(() => {
         return createAiDriver(settings.activeProvider, settings.providers[settings.activeProvider]);
     }, [settings.activeProvider, settings.providers]);
 
+    const { activeLeftItem, activeRightItem, openDocuments } = useDocument();
+
+    const getContextData = useCallback(async () => {
+        const { context } = settings;
+        const results: { path: string; name: string; content: string }[] = [];
+        const pathsToRead = new Set<string>();
+
+        if (context.includeActiveLeft && activeLeftItem) pathsToRead.add(activeLeftItem.path);
+        if (context.includeActiveRight && activeRightItem) pathsToRead.add(activeRightItem.path);
+        if (context.includeAllOpen) {
+            openDocuments.forEach(doc => pathsToRead.add(doc.path));
+        }
+        context.customPaths.forEach(path => pathsToRead.add(path));
+
+        for (const path of pathsToRead) {
+            const openDoc = openDocuments.find(d => d.path === path);
+            if (openDoc) {
+                results.push({ path, name: openDoc.baseName, content: openDoc.content });
+            } else {
+                try {
+                    const doc = await readDocument(path);
+                    results.push({ path, name: doc.baseName, content: doc.content });
+                } catch (e) {
+                    console.warn(`Failed to read context file: ${path}`, e);
+                }
+            }
+        }
+        return results;
+    }, [settings.context, activeLeftItem, activeRightItem, openDocuments]);
+
     return (
-        <AiContext.Provider value={{ settings, updateProvider, updateProviderSettings, getDriver, isLoading }}>
+        <AiContext.Provider value={{ 
+            settings, 
+            updateProvider, 
+            updateProviderSettings, 
+            updateContextSettings,
+            addCustomPath,
+            removeCustomPath,
+            getDriver, 
+            getContextData,
+            isLoading 
+        }}>
             {children}
         </AiContext.Provider>
     );

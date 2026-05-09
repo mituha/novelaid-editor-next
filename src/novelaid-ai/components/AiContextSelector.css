@@ -1,0 +1,147 @@
+.ai-context-selector {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: var(--bg-secondary);
+}
+
+.ai-context-summary {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    user-select: none;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.ai-context-summary:hover {
+    background-color: var(--bg-hover);
+}
+
+.expand-icon {
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+}
+
+.icon-context {
+    color: var(--accent-color);
+}
+
+.summary-text {
+    flex: 1;
+    font-weight: 500;
+}
+
+.badge {
+    background-color: var(--accent-color);
+    color: white;
+    font-size: 0.7rem;
+    padding: 0 6px;
+    border-radius: 10px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ai-context-details {
+    border-top: 1px solid var(--border-color);
+    padding: 0.5rem;
+    background-color: var(--bg-primary);
+}
+
+.context-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.context-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.context-item:hover {
+    background-color: var(--bg-hover);
+}
+
+.context-item input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.side-label, .all-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.file-name {
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-primary);
+}
+
+.context-custom-dropzone {
+    border: 1px dashed var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    transition: all 0.2s;
+}
+
+.context-custom-dropzone.drag-over {
+    border-color: var(--accent-color);
+    background-color: var(--bg-hover);
+}
+
+.dropzone-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.custom-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.custom-file-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: var(--bg-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+}
+
+.custom-file-item .file-name {
+    flex: 1;
+}
+
+.remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    padding: 2px;
+    border-radius: 2px;
+}
+
+.remove-btn:hover {
+    background-color: var(--error-color, #f4433622);
+    color: var(--error-color, #f44336);
+}

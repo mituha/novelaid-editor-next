@@ -14,7 +14,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [messages, setMessages] = useState<AiMessage[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
-    const { getDriver } = useAiModule();
+    const { getDriver, getContextData } = useAiModule();
 
     const clearMessages = useCallback(() => {
         setMessages([]);
@@ -23,32 +23,47 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const sendMessage = useCallback(async (text: string) => {
         if (!text.trim() || isGenerating) return;
 
-        const userMessage: AiMessage = {
-            id: crypto.randomUUID(),
-            role: 'user',
-            content: text,
-            timestamp: Date.now()
-        };
-
-        const assistantMessage: AiMessage = {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: '',
-            thought: '',
-            timestamp: Date.now()
-        };
-
-        setMessages(prev => [...prev, userMessage, assistantMessage]);
         setIsGenerating(true);
 
         try {
+            // AIコンテキスト（参照ファイル）の取得
+            const contextFiles = await getContextData();
+            let contextPrompt = "";
+            if (contextFiles.length > 0) {
+                contextPrompt = "以下の参照情報に基づいて回答してください：\n\n";
+                contextFiles.forEach(file => {
+                    contextPrompt += `--- FILE: ${file.name} (Path: ${file.path}) ---\n${file.content}\n\n`;
+                });
+                contextPrompt += "--- 参照情報終了 ---\n\n";
+            }
+
+            const userMessage: AiMessage = {
+                id: crypto.randomUUID(),
+                role: 'user',
+                content: text,
+                timestamp: Date.now()
+            };
+
+            const assistantMessage: AiMessage = {
+                id: crypto.randomUUID(),
+                role: 'assistant',
+                content: '',
+                thought: '',
+                timestamp: Date.now()
+            };
+
+            setMessages(prev => [...prev, userMessage, assistantMessage]);
+
             const driver = getDriver();
-            // 履歴を渡す (システムプロンプト等は将来的に設定可能に)
-            const chatHistory = messages.concat(userMessage);
-            
+            // コンテキストを注入したメッセージを構築（履歴には含めず、現在送信分のみ）
+            const chatMessages = [
+                ...messages.map(m => ({ role: m.role, content: m.content })),
+                { role: 'user' as const, content: contextPrompt + text }
+            ];
+
             const stream = await driver.streamText({
-                messages: chatHistory,
-                enableThinking: true // 思考プロセスを有効化
+                messages: chatMessages,
+                enableThinking: true
             });
 
             const reader = stream.getReader();
@@ -90,7 +105,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } finally {
             setIsGenerating(false);
         }
-    }, [messages, isGenerating, getDriver]);
+    }, [messages, isGenerating, getDriver, getContextData]);
 
     return (
         <ChatContext.Provider value={{ messages, sendMessage, clearMessages, isGenerating }}>

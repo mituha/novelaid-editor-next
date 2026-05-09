@@ -8,9 +8,20 @@ export * from 'restar-ai';
 export type AllAiProviderSettings = Record<AiProvider, ProviderSettings>;
 
 /**
+ * AI コンテキストの設定
+ */
+export interface AiContextSettings {
+    includeActiveLeft: boolean;
+    includeActiveRight: boolean;
+    includeAllOpen: boolean;
+    customPaths: string[];
+}
+
+/**
  * AI モジュールの設定データ
  */
 export interface AiModuleSettings {
     activeProvider: AiProvider;
     providers: AllAiProviderSettings;
+    context: AiContextSettings;
 }

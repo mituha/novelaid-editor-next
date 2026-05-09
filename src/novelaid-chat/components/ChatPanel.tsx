@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { AiChatInput } from 'restar-ai';
 import { useChatModule } from '../contexts/ChatContext';
+import { AiContextSelector } from '../../novelaid-ai/components/AiContextSelector';
 import { ChevronDown, ChevronUp, Bot, User, Trash2 } from 'lucide-react';
 import './ChatPanel.css';
 
@@ -30,6 +31,11 @@ export const ChatPanel: React.FC = () => {
                     <Trash2 size={16} />
                 </button>
             </div>
+
+            <div className="chat-context-area">
+                <AiContextSelector />
+            </div>
+            
             
             <div className="message-list" ref={scrollRef}>
                 {messages.length === 0 && (

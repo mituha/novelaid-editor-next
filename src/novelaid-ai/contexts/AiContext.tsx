@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { AiProvider, ProviderSettings, AiModuleSettings, AllAiProviderSettings } from '../types';
+import { AiProvider, ProviderSettings, AiModuleSettings, AllAiProviderSettings, AiDriver, createAiDriver } from '../types';
 import { ConfigService } from '../../services/configService';
 
 interface AiContextType {
     settings: AiModuleSettings;
     updateProvider: (provider: AiProvider) => Promise<void>;
     updateProviderSettings: (settings: ProviderSettings) => Promise<void>;
+    getDriver: () => AiDriver;
     isLoading: boolean;
 }
 
@@ -87,8 +88,12 @@ export const AiProviderComponent: React.FC<{ children: React.ReactNode }> = ({ c
         await saveSettings(newSettings);
     };
 
+    const getDriver = useCallback(() => {
+        return createAiDriver(settings.activeProvider, settings.providers[settings.activeProvider]);
+    }, [settings.activeProvider, settings.providers]);
+
     return (
-        <AiContext.Provider value={{ settings, updateProvider, updateProviderSettings, isLoading }}>
+        <AiContext.Provider value={{ settings, updateProvider, updateProviderSettings, getDriver, isLoading }}>
             {children}
         </AiContext.Provider>
     );

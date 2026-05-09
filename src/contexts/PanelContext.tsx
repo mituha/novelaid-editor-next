@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { PanelDefinition, PaneSide, PaneState } from '../types/panel';
-import { Files, Tag } from 'lucide-react';
+import { Files, Tag, MessageSquare } from 'lucide-react';
 import { FileExplorer } from '../components/FileExplorer';
 import { MetadataPanel } from '../components/MetadataPanel';
+import { ChatPanel } from '../novelaid-chat/components/ChatPanel';
 
 interface PanelContextType {
     panels: PanelDefinition[];
@@ -30,6 +31,13 @@ export const PanelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             title: 'メタデータ',
             icon: <Tag size={20} />,
             component: MetadataPanel,
+            defaultSide: 'right'
+        },
+        {
+            id: 'ai-chat',
+            title: 'AIチャット',
+            icon: <MessageSquare size={20} />,
+            component: ChatPanel,
             defaultSide: 'right'
         }
     ]);

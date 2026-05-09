@@ -8,6 +8,7 @@ import { ProjectProvider } from "./contexts/ProjectContext";
 import { DocumentProvider } from "./contexts/DocumentContext";
 import { PanelProvider } from "./contexts/PanelContext";
 import { AiProviderComponent } from "./novelaid-ai/contexts/AiContext";
+import { ChatProvider } from "./novelaid-chat/contexts/ChatContext";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
           <DocumentProvider>
             <PanelProvider>
               <AiProviderComponent>
-                <App />
+                <ChatProvider>
+                  <App />
+                </ChatProvider>
               </AiProviderComponent>
             </PanelProvider>
           </DocumentProvider>

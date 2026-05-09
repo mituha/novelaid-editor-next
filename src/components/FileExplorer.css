@@ -3,8 +3,8 @@
     flex-direction: column;
     height: 100%;
     overflow: hidden;
-    background-color: var(--bg-surface);
-    color: var(--text-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     font-size: 13px;
 }
 
@@ -73,7 +73,7 @@
 .type-css .file-icon { color: #f44336; }          /* Red */
 .type-git-diff .file-icon { color: #607d8b; }     /* Blue Grey */
 .type-browser .file-icon { color: #00bcd4; }      /* Cyan */
-.type-unknown .file-icon { color: var(--text-muted); }
+.type-unknown .file-icon { color: var(--text-secondary); }
 
 .file-node.active .file-icon {
     color: white !important;
@@ -90,7 +90,7 @@
 .file-explorer-error {
     padding: 20px;
     text-align: center;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-style: italic;
 }
 

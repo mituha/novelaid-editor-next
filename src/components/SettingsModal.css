@@ -12,8 +12,8 @@
 }
 
 .modal-content {
-    background-color: var(--bg-surface);
-    color: var(--text-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     width: 90%;
     max-width: 500px;
     border-radius: 12px;
@@ -37,7 +37,7 @@
 .close-btn {
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     cursor: pointer;
     display: flex;
     padding: 4px;
@@ -46,8 +46,8 @@
 }
 
 .close-btn:hover {
-    background-color: var(--bg-hover);
-    color: var(--text-color);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 .modal-body {
@@ -57,7 +57,7 @@
 .setting-section h3 {
     margin: 0 0 1rem 0;
     font-size: 1rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 .theme-options {
@@ -72,10 +72,10 @@
     align-items: center;
     gap: 0.5rem;
     padding: 1rem;
-    background-color: var(--bg-color);
+    background-color: var(--bg-primary);
     border: 2px solid var(--border-color);
     border-radius: 8px;
-    color: var(--text-color);
+    color: var(--text-primary);
     cursor: pointer;
     transition: all 0.2s;
 }

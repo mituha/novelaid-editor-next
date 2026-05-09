@@ -4,8 +4,8 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: var(--bg-color);
-  color: var(--text-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   position: relative;
 }
 
@@ -18,7 +18,7 @@
 .settings-toggle {
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 8px;
@@ -27,15 +27,15 @@
 }
 
 .settings-toggle:hover {
-  background-color: var(--bg-surface);
-  color: var(--text-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .launcher-content {
   text-align: center;
   padding: 3rem;
-  background-color: var(--bg-surface);
+  background-color: var(--bg-secondary);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
@@ -49,7 +49,7 @@ h1 {
 
 .subtitle {
   margin-bottom: 2rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .action-buttons {

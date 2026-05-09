@@ -12,9 +12,15 @@ export interface AppSettings {
     // Add more user settings as needed
 }
 
+export interface ProjectItem {
+    name: string;
+    path: string;
+}
+
 export interface AppSession {
     lastProjectPath: string | null;
     lastOpenedFiles: string[];
+    recentProjects: ProjectItem[];
 }
 
 export interface AppState {

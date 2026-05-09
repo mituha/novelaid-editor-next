@@ -1,6 +1,7 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import { ProjectLauncher } from './pages/ProjectLauncher';
 import { MainLayout } from './pages/MainLayout';
+import 'restar-app/index.css';
 import './App.css';
 
 function App() {

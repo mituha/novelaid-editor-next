@@ -11,6 +11,8 @@ interface AppContextType {
     state: AppState;
     updateSettings: (settings: Partial<AppSettings>) => Promise<void>;
     updateSession: (session: Partial<AppSession>) => Promise<void>;
+    addRecentProject: (name: string, path: string) => Promise<void>;
+    removeRecentProject: (path: string) => Promise<void>;
     updateState: (state: Partial<AppState>) => Promise<void>;
     setProjectTitle: (title: string | null) => void;
     isLoading: boolean;
@@ -21,7 +23,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [config, setConfig] = useState<AppConfig>({ name: 'novelaid-editor-next', version: '0.2.0' });
     const [settings, setSettings] = useState<AppSettings>({ theme: 'system', language: 'ja' });
-    const [session, setSession] = useState<AppSession>({ lastProjectPath: null, lastOpenedFiles: [] });
+    const [session, setSession] = useState<AppSession>({ lastProjectPath: null, lastOpenedFiles: [], recentProjects: [] });
     const [state, setState] = useState<AppState>({ windowSize: { width: 1200, height: 800 }, sidebarWidth: 260 });
     const [projectTitle, setProjectTitle] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -61,6 +63,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         await ConfigService.saveAppConfig('session', updated);
     };
 
+    const addRecentProject = async (name: string, path: string) => {
+        const others = (session.recentProjects || []).filter(p => p.path !== path);
+        const updated = [{ name, path }, ...others].slice(0, 10);
+        await updateSession({ recentProjects: updated });
+    };
+
+    const removeRecentProject = async (path: string) => {
+        const updated = (session.recentProjects || []).filter(p => p.path !== path);
+        await updateSession({ recentProjects: updated });
+    };
+
     const updateState = async (newState: Partial<AppState>) => {
         const updated = { ...state, ...newState };
         setState(updated);
@@ -90,7 +103,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         <AppContext.Provider
             value={{
                 config, settings, session, state,
-                updateSettings, updateSession, updateState,
+                updateSettings, updateSession, addRecentProject, removeRecentProject, updateState,
                 setProjectTitle,
                 isLoading
             }}

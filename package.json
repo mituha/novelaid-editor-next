@@ -20,7 +20,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.13.1",
-    "restar-ai": "^0.10.0",
+    "restar-ai": "^0.11.0",
     "restar-app": "^0.1.1",
     "tauri-plugin-novelaid-fs-api": "file:./tauri-plugin-novelaid-fs/"
   },

@@ -81,6 +81,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     accumulatedText += value.content;
                 } else if (value.type === 'thought') {
                     accumulatedThought += value.content;
+                } else if (value.type === 'error') {
+                    setMessages(prev => {
+                        const newMessages = [...prev];
+                        const lastIdx = newMessages.length - 1;
+                        newMessages[lastIdx] = {
+                            ...newMessages[lastIdx],
+                            error: value.content
+                        };
+                        return newMessages;
+                    });
+                    break;
                 }
 
                 setMessages(prev => {
@@ -111,17 +122,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (lastIdx >= 0 && newMessages[lastIdx].role === 'assistant') {
                     newMessages[lastIdx] = {
                         ...newMessages[lastIdx],
-                        content: displayError,
-                        metadata: { ...newMessages[lastIdx].metadata, isError: true }
+                        error: displayError
                     };
                 } else {
                     // 追加されていない場合は新規追加（コンテキスト取得エラー時など）
                     newMessages.push({
                         id: crypto.randomUUID(),
                         role: 'assistant',
-                        content: displayError,
-                        timestamp: Date.now(),
-                        metadata: { isError: true }
+                        content: '',
+                        error: displayError,
+                        timestamp: Date.now()
                     });
                 }
                 return newMessages;

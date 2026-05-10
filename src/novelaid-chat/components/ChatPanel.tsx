@@ -3,7 +3,7 @@ import { AiChatInput } from 'restar-ai';
 import { useChatModule } from '../contexts/ChatContext';
 import { AiContextSelector } from '../../novelaid-ai/components/AiContextSelector';
 import { PersonaSelector } from '../../novelaid-ai/components/PersonaSelector';
-import { ChevronDown, ChevronUp, Bot, User, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Bot, User, Trash2, AlertCircle } from 'lucide-react';
 import './ChatPanel.css';
 
 export const ChatPanel: React.FC = () => {
@@ -43,7 +43,7 @@ export const ChatPanel: React.FC = () => {
                     </div>
                 )}
                 {messages.map((msg, idx) => (
-                    <div key={msg.id} className={`message-item ${msg.role} ${msg.metadata?.isError ? 'error' : ''}`}>
+                    <div key={msg.id} className={`message-item ${msg.role} ${msg.error ? 'error' : ''}`}>
                         <div className="message-icon">
                             {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
                         </div>
@@ -55,7 +55,15 @@ export const ChatPanel: React.FC = () => {
                                 </details>
                             )}
                             <div className="message-content">
-                                {msg.role === 'assistant' && !msg.content && isGenerating && idx === messages.length - 1 ? (
+                                {msg.error ? (
+                                    <div className="error-container">
+                                        <div className="error-header">
+                                            <AlertCircle size={14} />
+                                            <span>エラー</span>
+                                        </div>
+                                        <div className="error-text">{msg.error}</div>
+                                    </div>
+                                ) : msg.role === 'assistant' && !msg.content && isGenerating && idx === messages.length - 1 ? (
                                     <div className="loading-indicator">
                                         <div className="dot-pulse"></div>
                                         <span>考え中...</span>

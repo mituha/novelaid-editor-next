@@ -209,11 +209,34 @@
 /* Error Message */
 .message-item.error .message-content {
     border: 1px solid var(--error-color, #f44336);
-    background-color: rgba(244, 67, 54, 0.05);
+    background-color: var(--error-bg, rgba(244, 67, 54, 0.05));
     color: var(--error-color, #f44336);
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.1);
 }
 
 .message-item.error .message-icon {
     border-color: var(--error-color, #f44336);
+    background-color: var(--error-bg, rgba(244, 67, 54, 0.05));
     color: var(--error-color, #f44336);
+}
+
+.error-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.error-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: bold;
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.error-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
 }

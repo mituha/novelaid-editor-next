@@ -42,8 +42,8 @@ export const ChatPanel: React.FC = () => {
                         <p>AI アシスタントに相談してみましょう。</p>
                     </div>
                 )}
-                {messages.map((msg) => (
-                    <div key={msg.id} className={`message-item ${msg.role}`}>
+                {messages.map((msg, idx) => (
+                    <div key={msg.id} className={`message-item ${msg.role} ${msg.metadata?.isError ? 'error' : ''}`}>
                         <div className="message-icon">
                             {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
                         </div>
@@ -55,17 +55,18 @@ export const ChatPanel: React.FC = () => {
                                 </details>
                             )}
                             <div className="message-content">
-                                {typeof msg.content === 'string' ? msg.content : '複雑なコンテンツは未対応'}
+                                {msg.role === 'assistant' && !msg.content && isGenerating && idx === messages.length - 1 ? (
+                                    <div className="loading-indicator">
+                                        <div className="dot-pulse"></div>
+                                        <span>考え中...</span>
+                                    </div>
+                                ) : (
+                                    typeof msg.content === 'string' ? msg.content : '複雑なコンテンツは未対応'
+                                )}
                             </div>
                         </div>
                     </div>
                 ))}
-                {isGenerating && messages[messages.length - 1]?.role !== 'assistant' && (
-                    <div className="message-item assistant loading">
-                        <div className="message-icon"><Bot size={16} className="spin" /></div>
-                        <div className="message-content">考え中...</div>
-                    </div>
-                )}
             </div>
 
             <div className="chat-input-wrapper">

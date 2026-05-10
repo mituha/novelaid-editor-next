@@ -32,7 +32,7 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         return pane === 'left' ? activeDocument.leftMainView : activeDocument.rightMainView;
     }, [activeItem, activeDocument, pane]);
     const content = activeDocument?.content || '';
-    const { theme } = useTheme();
+    const { actualTheme } = useTheme();
     const saveFileRef = React.useRef(saveFile);
     const editorRef = React.useRef<any>(null);
     const decorationsRef = React.useRef<string[]>([]);
@@ -67,6 +67,14 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
     }, []);
 
+    const handleEditorBeforeMount = (monaco: Monaco) => {
+        // 言語登録
+        registerNovelLanguage(monaco);
+
+        // テーマ登録
+        defineThemes(monaco);
+    };
+
     const handleEditorChange = (value: string | undefined) => {
         if (value !== undefined) {
             setContent(value);
@@ -82,12 +90,6 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         });
 
         decorationsRef.current = []; // 前のエディタインスタンスのデコレーションIDをクリア
-
-        // 言語登録
-        registerNovelLanguage(monaco);
-
-        // テーマ登録
-        defineThemes(monaco);
 
         // 初回デコレーション
         updateDecorations(editor, monaco);
@@ -218,9 +220,10 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
                 key={`${activeFilePath}-${activeItem?.isPreview ? 'preview' : 'main'}`}
                 height="100%"
                 language={getLanguage(activeDocument?.documentType, activeDocument?.baseName)}
-                theme={theme === 'dark' ? 'novelaid-dark' : 'novelaid-light'}
+                theme={actualTheme === 'dark' ? 'novelaid-dark' : 'novelaid-light'}
                 value={content}
                 onChange={handleEditorChange}
+                beforeMount={handleEditorBeforeMount}
                 onMount={handleEditorMount}
                 options={{
                     minimap: { enabled: true },

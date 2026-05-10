@@ -1,7 +1,7 @@
 {
   "name": "novelaid-editor-next",
   "private": true,
-  "version": "0.6.2",
+  "version": "0.6.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -20,7 +20,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.13.1",
-    "restar-ai": "^0.9.0",
+    "restar-ai": "^0.10.0",
     "restar-app": "^0.1.1",
     "tauri-plugin-novelaid-fs-api": "file:./tauri-plugin-novelaid-fs/"
   },

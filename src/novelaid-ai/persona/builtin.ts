@@ -1,4 +1,4 @@
-import { BasePersona } from './persona';
+import { BasePersona } from 'restar-ai';
 
 /**
  * デフォルトペルソナ：標準的なAIアシスタント

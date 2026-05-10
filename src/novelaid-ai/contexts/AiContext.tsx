@@ -3,7 +3,7 @@ import { AiProvider, ProviderSettings, AiModuleSettings, AllAiProviderSettings, 
 import { ConfigService } from '../../services/configService';
 import { readDocument } from 'tauri-plugin-novelaid-fs-api';
 import { useDocument } from '../../contexts/DocumentContext';
-import { AiPersona } from '../persona/types';
+import { AiPersona } from 'restar-ai';
 import { builtinPersonas } from '../persona/builtin';
 
 interface AiContextType {

@@ -106,7 +106,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } finally {
             setIsGenerating(false);
         }
-    }, [messages, isGenerating, getDriver, getContextData]);
+    }, [messages, isGenerating, getDriver, getContextData, activePersona]);
 
     return (
         <ChatContext.Provider value={{ messages, sendMessage, clearMessages, isGenerating }}>

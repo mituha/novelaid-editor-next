@@ -14,7 +14,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [messages, setMessages] = useState<AiMessage[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
-    const { getDriver, getContextData } = useAiModule();
+    const { getDriver, getContextData, activePersona } = useAiModule();
 
     const clearMessages = useCallback(() => {
         setMessages([]);
@@ -62,6 +62,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ];
 
             const stream = await driver.streamText({
+                system: activePersona.systemPrompt,
                 messages: chatMessages,
                 enableThinking: true
             });

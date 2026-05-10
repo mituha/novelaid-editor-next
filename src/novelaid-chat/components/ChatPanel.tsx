@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { AiChatInput } from 'restar-ai';
 import { useChatModule } from '../contexts/ChatContext';
 import { AiContextSelector } from '../../novelaid-ai/components/AiContextSelector';
+import { PersonaSelector } from '../../novelaid-ai/components/PersonaSelector';
 import { ChevronDown, ChevronUp, Bot, User, Trash2 } from 'lucide-react';
 import './ChatPanel.css';
 
@@ -27,6 +28,8 @@ export const ChatPanel: React.FC = () => {
     return (
         <div className="novelaid-chat-panel">
             <div className="chat-toolbar">
+                <PersonaSelector />
+                <div className="toolbar-spacer" style={{ flex: 1 }}></div>
                 <button className="icon-btn" onClick={clearMessages} title="チャット履歴を消去">
                     <Trash2 size={16} />
                 </button>

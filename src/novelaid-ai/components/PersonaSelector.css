@@ -1,0 +1,103 @@
+.persona-selector {
+    position: relative;
+    display: inline-block;
+    user-select: none;
+}
+
+.persona-selected {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: var(--bg-secondary, #f5f5f5);
+    border: 1px solid var(--border-color, #ddd);
+    transition: all 0.2s ease;
+}
+
+.persona-selected:hover {
+    background-color: var(--bg-hover, #ebebeb);
+    border-color: var(--primary-color, #007bff);
+}
+
+.persona-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary, #333);
+}
+
+.persona-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary, #333);
+}
+
+.chevron {
+    color: var(--text-secondary, #666);
+    transition: transform 0.2s ease;
+}
+
+.chevron.open {
+    transform: rotate(180deg);
+}
+
+.persona-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 1000;
+    min-width: 240px;
+    background-color: var(--bg-primary, #fff);
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 4px;
+    overflow: hidden;
+}
+
+.persona-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.persona-option:hover {
+    background-color: var(--bg-secondary, #f5f5f5);
+}
+
+.persona-option.active {
+    background-color: var(--primary-light, #e7f3ff);
+}
+
+.persona-option-icon {
+    margin-top: 2px;
+    color: var(--text-secondary, #666);
+}
+
+.persona-option.active .persona-option-icon {
+    color: var(--primary-color, #007bff);
+}
+
+.persona-option-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.persona-option-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary, #333);
+}
+
+.persona-option-desc {
+    font-size: 11px;
+    color: var(--text-secondary, #888);
+    line-height: 1.4;
+}

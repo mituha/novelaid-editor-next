@@ -3,6 +3,8 @@ import { AiProvider, ProviderSettings, AiModuleSettings, AllAiProviderSettings, 
 import { ConfigService } from '../../services/configService';
 import { readDocument } from 'tauri-plugin-novelaid-fs-api';
 import { useDocument } from '../../contexts/DocumentContext';
+import { AiPersona } from '../persona/types';
+import { builtinPersonas } from '../persona/builtin';
 
 interface AiContextType {
     settings: AiModuleSettings;
@@ -13,6 +15,11 @@ interface AiContextType {
     removeCustomPath: (path: string) => void;
     getDriver: () => AiDriver;
     getContextData: () => Promise<{ path: string; name: string; content: string }[]>;
+    // ペルソナ関連
+    personas: AiPersona[];
+    activePersonaId: string;
+    activePersona: AiPersona;
+    setActivePersona: (id: string) => void;
     isLoading: boolean;
 }
 
@@ -35,6 +42,7 @@ const DEFAULT_AI_SETTINGS: AiModuleSettings = {
 
 export const AiProviderComponent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [settings, setSettings] = useState<AiModuleSettings>(DEFAULT_AI_SETTINGS);
+    const [activePersonaId, setActivePersonaIdState] = useState<string>('default');
     const [isLoading, setIsLoading] = useState(true);
 
     const loadSettings = useCallback(async () => {
@@ -54,6 +62,9 @@ export const AiProviderComponent: React.FC<{ children: React.ReactNode }> = ({ c
                     },
                     context: savedSettings.aiContext || DEFAULT_AI_SETTINGS.context
                 });
+            }
+            if (savedSettings.activePersonaId) {
+                setActivePersonaIdState(savedSettings.activePersonaId);
             }
         } catch (error) {
             console.error('Failed to load AI settings:', error);
@@ -76,7 +87,8 @@ export const AiProviderComponent: React.FC<{ children: React.ReactNode }> = ({ c
                 ...appConfig.settings,
                 aiProvider: newSettings.activeProvider,
                 aiSettings: newSettings.providers,
-                aiContext: newSettings.context
+                aiContext: newSettings.context,
+                activePersonaId: activePersonaId
             };
             await ConfigService.saveAppConfig('settings', updatedAppSettings);
         } catch (error) {
@@ -158,6 +170,22 @@ export const AiProviderComponent: React.FC<{ children: React.ReactNode }> = ({ c
         return results;
     }, [settings.context, activeLeftItem, activeRightItem, openDocuments]);
 
+    const activePersona = builtinPersonas.find(p => p.id === activePersonaId) || builtinPersonas[0];
+
+    const setActivePersona = useCallback(async (id: string) => {
+        setActivePersonaIdState(id);
+        try {
+            const appConfig = await ConfigService.loadAppConfig();
+            const updatedAppSettings = {
+                ...appConfig.settings,
+                activePersonaId: id
+            };
+            await ConfigService.saveAppConfig('settings', updatedAppSettings);
+        } catch (error) {
+            console.error('Failed to save active persona:', error);
+        }
+    }, []);
+
     return (
         <AiContext.Provider value={{ 
             settings, 
@@ -168,6 +196,10 @@ export const AiProviderComponent: React.FC<{ children: React.ReactNode }> = ({ c
             removeCustomPath,
             getDriver, 
             getContextData,
+            personas: builtinPersonas,
+            activePersonaId,
+            activePersona,
+            setActivePersona,
             isLoading 
         }}>
             {children}

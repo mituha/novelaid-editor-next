@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAiModule } from '../contexts/AiContext';
 import * as LucideIcons from 'lucide-react';
+import { PersonaIcon } from './PersonaIcon';
 import './PersonaSelector.css';
 
 export const PersonaSelector: React.FC = () => {
@@ -20,17 +21,11 @@ export const PersonaSelector: React.FC = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const getIcon = (iconName?: string) => {
-        if (!iconName) return <LucideIcons.User size={16} />;
-        const IconComponent = (LucideIcons as any)[iconName];
-        return IconComponent ? <IconComponent size={16} /> : <LucideIcons.User size={16} />;
-    };
-
     return (
         <div className="persona-selector" ref={dropdownRef}>
             <div className="persona-selected" onClick={toggleDropdown} title={activePersona.description}>
                 <div className="persona-icon-wrapper">
-                    {getIcon(activePersona.icon)}
+                    <PersonaIcon persona={activePersona} size={16} />
                 </div>
                 <span className="persona-name">{activePersona.name}</span>
                 <LucideIcons.ChevronDown size={14} className={`chevron ${isOpen ? 'open' : ''}`} />
@@ -48,7 +43,7 @@ export const PersonaSelector: React.FC = () => {
                             }}
                         >
                             <div className="persona-option-icon">
-                                {getIcon(persona.icon)}
+                                <PersonaIcon persona={persona} size={16} />
                             </div>
                             <div className="persona-option-info">
                                 <div className="persona-option-name">{persona.name}</div>

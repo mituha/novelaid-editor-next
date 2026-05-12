@@ -4,6 +4,8 @@ import { Files, Tag, MessageSquare } from 'lucide-react';
 import { FileExplorer } from '../components/FileExplorer';
 import { MetadataPanel } from '../components/MetadataPanel';
 import { ChatPanel } from '../novelaid-chat/components/ChatPanel';
+import { ProofreaderPanel } from '../novelaid-ai/components/ProofreaderPanel';
+import { SearchCheck } from 'lucide-react';
 
 interface PanelContextType {
     panels: PanelDefinition[];
@@ -38,6 +40,13 @@ export const PanelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             title: 'AIチャット',
             icon: <MessageSquare size={20} />,
             component: ChatPanel,
+            defaultSide: 'right'
+        },
+        {
+            id: 'ai-proofreader',
+            title: 'AI校正',
+            icon: <SearchCheck size={20} />,
+            component: ProofreaderPanel,
             defaultSide: 'right'
         }
     ]);

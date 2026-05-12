@@ -3,6 +3,7 @@ import { AiChatInput } from 'restar-ai';
 import { useChatModule } from '../contexts/ChatContext';
 import { AiContextSelector } from '../../novelaid-ai/components/AiContextSelector';
 import { PersonaSelector } from '../../novelaid-ai/components/PersonaSelector';
+import { MessageMarkdown } from './MessageMarkdown';
 import { ChevronDown, ChevronUp, Bot, User, Trash2, AlertCircle } from 'lucide-react';
 import './ChatPanel.css';
 
@@ -69,7 +70,7 @@ export const ChatPanel: React.FC = () => {
                                         <span>考え中...</span>
                                     </div>
                                 ) : (
-                                    typeof msg.content === 'string' ? msg.content : '複雑なコンテンツは未対応'
+                                    <MessageMarkdown content={typeof msg.content === 'string' ? msg.content : '複雑なコンテンツは未対応'} />
                                 )}
                             </div>
                         </div>

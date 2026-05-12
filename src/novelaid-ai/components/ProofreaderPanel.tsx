@@ -15,6 +15,7 @@ import { AiChatInput } from 'restar-ai';
 import { useAiModule } from '../contexts/AiContext';
 import { useDocument } from '../../contexts/DocumentContext';
 import { AiContextSelector } from './AiContextSelector';
+import { MessageMarkdown } from '../../novelaid-chat/components/MessageMarkdown';
 import { AiMessage } from '../types';
 import './ProofreaderPanel.css';
 
@@ -253,7 +254,7 @@ export const ProofreaderPanel: React.FC = () => {
                                         <span>考え中...</span>
                                     </div>
                                 ) : (
-                                    typeof msg.content === 'string' ? msg.content : 'コンテンツエラー'
+                                    <MessageMarkdown content={typeof msg.content === 'string' ? msg.content : 'コンテンツエラー'} />
                                 )}
                             </div>
                         </div>

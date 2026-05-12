@@ -18,18 +18,36 @@ export class ConlangGenerator {
   }
 
   /**
-   * AIからのレスポンス（Markdownコードブロック等を含む可能性がある）からJSONを安全に抽出します。
+   * AIからのレスポンスからJSONを抽出し、構文エラーを誘発する制御文字等を除去して安全にパースします。
    */
   private parseResponseJson<T>(content: string): T {
-    // ```json ... ``` または ``` ... ``` を除去
+    // ```json ... ``` または ``` ... ``` を抽出
     const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    const rawJson = jsonMatch ? jsonMatch[1] : content;
+    let rawJson = jsonMatch ? jsonMatch[1] : content;
     
+    // JSONとして不正な制御文字を除去
+    // 特に文字列リテラル内での生のタブが SyntaxError: Bad control character を引き起こす
+    rawJson = rawJson.replace(/[\x00-\x1F\x7F-\x9F]/g, (match) => {
+      if (match === '\n' || match === '\r') return match; // 改行は後で処理
+      if (match === '\t') return '  ';
+      return '';
+    });
+
     try {
       return JSON.parse(rawJson.trim());
     } catch (e) {
-      console.error('Failed to parse AI response as JSON:', rawJson);
-      throw new Error(`AIの応答をJSONとして解析できませんでした: ${e}`);
+      console.error('Initial JSON parse failed, attempting cleanup...', e);
+      
+      // 文字列内の生の改行をエスケープしてみる（よくあるエラーの原因）
+      try {
+        const cleaned = rawJson.replace(/"([^"]*)"/g, (match, p1) => {
+          return `"${p1.replace(/\n/g, '\\n').replace(/\r/g, '')}"`;
+        });
+        return JSON.parse(cleaned.trim());
+      } catch (e2) {
+        console.error('Cleanup parse failed:', rawJson);
+        throw new Error(`AIの応答をJSONとして解析できませんでした（構文エラー）。出力を簡略化するか、別のモデルをお試しください。: ${e2}`);
+      }
     }
   }
 
@@ -54,8 +72,8 @@ export class ConlangGenerator {
    */
   async generatePhonology(params: GenerationParams, concept: string): Promise<Phonology> {
     const prompt = `コンセプト「${concept}」に基づき、この言語の音韻論（音素と音節構造）を設計してください。
-    JSON形式で出力してください。
-    スキーマ: { phonemes: { symbol: string, ipa: string, type: 'consonant'|'vowel'|'diphthong'|'other' }[], syllableStructures: { pattern: string }[] }`;
+    【重要】必ず有効な単一のJSONオブジェクトのみを出力してください。文字列内での生の改行やタブは厳禁です。
+    スキーマ: { "phonemes": [{ "symbol": "文字", "ipa": "IPA記号", "type": "consonant|vowel|diphthong" }], "syllableStructures": [{ "pattern": "CV等", "description": "簡潔な説明" }] }`;
 
     const res = await this.driver.generateText({
       system: LinguistPersona.systemPrompt,
@@ -71,8 +89,8 @@ export class ConlangGenerator {
   async generateMorphology(params: GenerationParams, concept: string, phonology: Phonology): Promise<Morphology> {
     const prompt = `音韻体系に基づき、形態論（語形成、活用等）を設計してください。
     コンセプト: ${concept}
-    JSON形式で出力してください。
-    スキーマ: { typology: string, wordFormationRules: string, affixes: { type: string, form: string, meaning: string }[] }`;
+    【重要】JSON文字列内での改行は避け、1行で記述してください。
+    スキーマ: { "typology": "分類", "wordFormationRules": "規則の説明", "affixes": [{ "type": "接頭辞等", "form": "形", "meaning": "意味" }] }`;
 
     const res = await this.driver.generateText({
       system: LinguistPersona.systemPrompt,
@@ -88,8 +106,8 @@ export class ConlangGenerator {
   async generateSyntax(params: GenerationParams, concept: string, morphology: Morphology): Promise<Syntax> {
     const prompt = `形態論（${morphology.typology}）に基づき、統語論（語順、文構造）を設計してください。
     コンセプト: ${concept}
-    JSON形式で出力してください。
-    スキーマ: { wordOrder: string, sentenceStructureRules: string, grammaticalRelations: string }`;
+    【重要】JSON形式を厳守し、文字列内に制御文字を含めないでください。
+    スキーマ: { "wordOrder": "SVO等", "sentenceStructureRules": "規則", "grammaticalRelations": "格等の説明" }`;
 
     const res = await this.driver.generateText({
       system: LinguistPersona.systemPrompt,
@@ -103,10 +121,10 @@ export class ConlangGenerator {
    * 文字体系の生成
    */
   async generateWritingSystem(params: GenerationParams, concept: string, phonology: Phonology): Promise<WritingSystem> {
-    const prompt = `この言語の文化的背景と音韻体系に基づき、文字体系を提案してください。
+    const prompt = `この言語の文化的背景に基づき、文字体系を提案してください。
     コンセプト: ${concept}
-    JSON形式で出力してください。
-    スキーマ: { name: string, type: string, description: string, direction: string, sampleText: string }`;
+    【重要】有効なJSONのみを出力してください。
+    スキーマ: { "name": "名称", "type": "体系", "description": "説明", "direction": "ltr/rtl/ttb", "sampleText": "例文" }`;
 
     const res = await this.driver.generateText({
       system: WorldBuilderPersona.systemPrompt,
@@ -120,7 +138,7 @@ export class ConlangGenerator {
    * 歴史背景の生成
    */
   async generateHistory(params: GenerationParams, concept: string, morphology: Morphology, syntax: Syntax): Promise<string> {
-    const prompt = `この言語の文法体系とコンセプトに基づき、歴史的背景を詳述してください。
+    const prompt = `この言語の文法体系とコンセプトに基づき、歴史向背景を詳述してください。
     コンセプト: ${concept}
     文法: ${morphology.typology}, ${syntax.wordOrder}`;
 
@@ -135,11 +153,10 @@ export class ConlangGenerator {
    * 語彙の生成
    */
   async generateVocabulary(params: GenerationParams, concept: string, phonology: Phonology, morphology: Morphology, syntax: Syntax): Promise<VocabularyEntry[]> {
-    const count = params.numInitialWords || 20;
+    const count = Math.min(params.numInitialWords || 20, 15); // 生成量を控えめにする
     const prompt = `これまでの設計に基づき、初期語彙を ${count} 語生成してください。
-    音韻: ${JSON.stringify(phonology.phonemes?.map(p => p.symbol))}
-    JSON形式で出力してください。
-    スキーマ: { vocabulary: { id: string, word: string, ipa: string, partOfSpeech: string, meaning: string }[] }`;
+    【重要】JSON文字列内での改行は絶対にしないでください。エスケープされた\\nは使用可能です。
+    スキーマ: { "vocabulary": [{ "word": "単語", "ipa": "IPA", "partOfSpeech": "品詞", "meaning": "意味" }] }`;
 
     const res = await this.driver.generateText({
       system: WorldBuilderPersona.systemPrompt,
@@ -156,9 +173,8 @@ export class ConlangGenerator {
   async generateExampleSentences(params: GenerationParams, vocabulary: VocabularyEntry[], morphology: Morphology, syntax: Syntax): Promise<ExampleSentence[]> {
     const count = params.numExampleSentences || 3;
     const prompt = `語彙と文法規則に基づき、例文を ${count} 件生成してください。
-    語彙サンプル: ${vocabulary.slice(0, 5).map(v => `${v.word} (${v.meaning})`).join(', ')}
-    JSON形式で出力してください。
-    スキーマ: { sentences: { id: string, original: string, translation: string, ipa: string, grammaticalBreakdown: string }[] }`;
+    【重要】JSON形式を厳守してください。
+    スキーマ: { "sentences": [{ "original": "原文", "translation": "訳", "ipa": "IPA", "grammaticalBreakdown": "文法解説" }] }`;
 
     const res = await this.driver.generateText({
       system: LinguistPersona.systemPrompt,

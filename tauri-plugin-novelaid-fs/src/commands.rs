@@ -160,6 +160,14 @@ pub(crate) async fn write_document<R: Runtime>(
 }
 
 #[command]
+pub(crate) async fn create_directory<R: Runtime>(
+    app: AppHandle<R>,
+    path: String,
+) -> Result<()> {
+    app.novelaid_fs().create_directory(std::path::Path::new(&path))
+}
+
+#[command]
 pub(crate) async fn get_metadata_cache<R: Runtime>(
     app: AppHandle<R>,
 ) -> Result<std::collections::HashMap<String, serde_json::Value>> {

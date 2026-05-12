@@ -5,7 +5,8 @@ import { FileExplorer } from '../components/FileExplorer';
 import { MetadataPanel } from '../components/MetadataPanel';
 import { ChatPanel } from '../novelaid-chat/components/ChatPanel';
 import { ProofreaderPanel } from '../novelaid-ai/components/ProofreaderPanel';
-import { SearchCheck } from 'lucide-react';
+import { ConlangPanel } from '../novelaid-conlang/components/ConlangPanel';
+import { SearchCheck, Languages } from 'lucide-react';
 
 interface PanelContextType {
     panels: PanelDefinition[];
@@ -47,6 +48,13 @@ export const PanelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             title: 'AI校正',
             icon: <SearchCheck size={20} />,
             component: ProofreaderPanel,
+            defaultSide: 'right'
+        },
+        {
+            id: 'conlang',
+            title: '架空言語',
+            icon: <Languages size={20} />,
+            component: ConlangPanel,
             defaultSide: 'right'
         }
     ]);

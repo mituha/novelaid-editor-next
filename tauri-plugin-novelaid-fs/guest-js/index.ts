@@ -66,6 +66,12 @@ export async function writeDocument(
   });
 }
 
+export async function createDirectory(path: string): Promise<void> {
+  await invoke('plugin:novelaid-fs|create_directory', {
+    path,
+  });
+}
+
 export async function getMetadataCache(): Promise<Record<string, any>> {
   return await invoke<Record<string, any>>('plugin:novelaid-fs|get_metadata_cache');
 }

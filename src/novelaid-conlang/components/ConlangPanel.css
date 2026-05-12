@@ -1,0 +1,108 @@
+.novelaid-conlang-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.conlang-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 8px;
+}
+
+.conlang-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.conlang-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 8px;
+  background-color: var(--bg-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border: 1px solid transparent;
+}
+
+.conlang-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.conlang-item.active {
+  border-color: var(--accent-color);
+  background-color: var(--bg-active);
+}
+
+.conlang-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: var(--accent-color-transparent);
+  color: var(--accent-color);
+  border-radius: 4px;
+  margin-right: 12px;
+}
+
+.conlang-info {
+  flex: 1;
+}
+
+.conlang-name {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.conlang-summary {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.create-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.create-btn:hover {
+  opacity: 0.9;
+}
+
+.conlang-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 20px;
+}
+
+.conlang-empty p {
+  margin-top: 12px;
+  font-size: 13px;
+}

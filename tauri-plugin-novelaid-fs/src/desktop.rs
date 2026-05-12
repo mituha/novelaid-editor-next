@@ -85,6 +85,11 @@ impl<R: Runtime> NovelaidFs<R> {
     Ok(())
   }
 
+  pub fn create_directory(&self, path: &Path) -> crate::Result<()> {
+    std::fs::create_dir_all(path).map_err(crate::Error::Io)?;
+    Ok(())
+  }
+
   pub fn get_metadata_cache(&self) -> HashMap<String, serde_json::Value> {
     let cache = self.metadata_cache.lock().unwrap();
     cache.clone()

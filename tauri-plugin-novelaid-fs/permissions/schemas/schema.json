@@ -295,6 +295,18 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "Enables the create_directory command",
+          "type": "string",
+          "const": "allow-create-directory",
+          "markdownDescription": "Enables the create_directory command"
+        },
+        {
+          "description": "Denies the create_directory command",
+          "type": "string",
+          "const": "deny-create-directory",
+          "markdownDescription": "Denies the create_directory command"
+        },
+        {
           "description": "Enables the get_directory_type command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-directory-type",
@@ -415,10 +427,10 @@
           "markdownDescription": "Denies the write_document command without any pre-configured scope."
         },
         {
-          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-get-directory-type`\n- `allow-read-directory`\n- `allow-set-project-directory`\n- `allow-get-project-directory`\n- `allow-read-document`\n- `allow-write-document`\n- `allow-get-metadata-cache`\n- `allow-scan-project-metadata`",
+          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-get-directory-type`\n- `allow-read-directory`\n- `allow-set-project-directory`\n- `allow-get-project-directory`\n- `allow-read-document`\n- `allow-write-document`\n- `allow-create-directory`\n- `allow-get-metadata-cache`\n- `allow-scan-project-metadata`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-get-directory-type`\n- `allow-read-directory`\n- `allow-set-project-directory`\n- `allow-get-project-directory`\n- `allow-read-document`\n- `allow-write-document`\n- `allow-get-metadata-cache`\n- `allow-scan-project-metadata`"
+          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-ping`\n- `allow-get-document-type`\n- `allow-get-directory-type`\n- `allow-read-directory`\n- `allow-set-project-directory`\n- `allow-get-project-directory`\n- `allow-read-document`\n- `allow-write-document`\n- `allow-create-directory`\n- `allow-get-metadata-cache`\n- `allow-scan-project-metadata`"
         }
       ]
     }

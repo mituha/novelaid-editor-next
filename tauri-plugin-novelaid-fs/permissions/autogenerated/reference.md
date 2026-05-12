@@ -12,6 +12,7 @@ Default permissions for the plugin
 - `allow-get-project-directory`
 - `allow-read-document`
 - `allow-write-document`
+- `allow-create-directory`
 - `allow-get-metadata-cache`
 - `allow-scan-project-metadata`
 
@@ -23,6 +24,32 @@ Default permissions for the plugin
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`novelaid-fs:allow-create-directory`
+
+</td>
+<td>
+
+Enables the create_directory command
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`novelaid-fs:deny-create-directory`
+
+</td>
+<td>
+
+Denies the create_directory command
+
+</td>
+</tr>
 
 <tr>
 <td>

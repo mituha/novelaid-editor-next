@@ -19,12 +19,11 @@ export const ConlangCreateModal: React.FC<ConlangCreateModalProps> = ({ onClose 
     numInitialWords: 20
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await generateConlang(params);
-    if (result) {
-      onClose();
-    }
+    // 生成を開始（非同期だが待たない）
+    generateConlang(params);
+    onClose();
   };
 
   return (
@@ -32,27 +31,13 @@ export const ConlangCreateModal: React.FC<ConlangCreateModalProps> = ({ onClose 
       <div className="conlang-modal">
         <div className="modal-header">
           <h2><Wand2 size={20} /> 架空言語を生成</h2>
-          <button className="close-btn" onClick={onClose} disabled={isLoading}>
+          <button className="close-btn" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-body">
-          {isLoading ? (
-            <div className="generation-loading">
-              <Loader2 size={48} className="animate-spin" />
-              <h3>{generationProgress?.message || '準備中...'}</h3>
-              <div className="progress-bar-container">
-                <div 
-                  className="progress-bar-fill" 
-                  style={{ width: `${generationProgress?.percentage || 0}%` }}
-                ></div>
-              </div>
-              <p>AIエージェントが協調して言語を構築しています。これには数十秒かかる場合があります。</p>
-            </div>
-          ) : (
-            <>
-              <div className="form-group">
+          <div className="form-group">
                 <label>言語名 (任意)</label>
                 <input 
                   type="text" 
@@ -110,8 +95,6 @@ export const ConlangCreateModal: React.FC<ConlangCreateModalProps> = ({ onClose 
                 <button type="button" className="secondary-btn" onClick={onClose}>キャンセル</button>
                 <button type="submit" className="primary-btn">生成を開始</button>
               </div>
-            </>
-          )}
         </form>
       </div>
     </div>

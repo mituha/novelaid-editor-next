@@ -157,62 +157,90 @@ export const useConlangs = () => {
     setConlangs(prev => prev.map(c => c.id === conlang.id ? conlang : c));
   }, [getFullDirPath]);
 
-  const generateConlang = useCallback(async (params: GenerationParams) => {
+  const generateConlang = useCallback(async (params: GenerationParams, existingConlang?: Conlang) => {
     setIsLoading(true);
     setError(null);
     try {
       const driver = getDriver();
       const generator = new ConlangGenerator(driver);
       
-      // 1. 初期ファイル作成
-      setGenerationProgress({ step: 'init', message: '初期ファイルを準備中...', percentage: 5 });
-      let currentConlang = await initConlang(params);
+      let currentConlang: Conlang;
 
+      if (existingConlang) {
+        setGenerationProgress({ step: 'resume', message: `「${existingConlang.name}」の構築を再開しています...`, percentage: 5 });
+        currentConlang = { ...existingConlang };
+      } else {
+        // 1. 新規初期ファイル作成
+        setGenerationProgress({ step: 'init', message: '初期ファイルを準備中...', percentage: 5 });
+        currentConlang = await initConlang(params);
+      }
+
+      // 各ステップ、データが未設定の場合のみ生成を実行する（再開対応）
+      
       // 2. コンセプト
-      setGenerationProgress({ step: 'concept', message: 'コンセプトを策定中...', percentage: 15 });
-      currentConlang.purposeConcept = await generator.generateConcept(params);
-      await updateConlang(currentConlang);
+      if (!currentConlang.purposeConcept || currentConlang.purposeConcept === '生成中...') {
+        setGenerationProgress({ step: 'concept_start', message: '💡 Coordinator: 言語の方向性を検討中...', percentage: 10 });
+        currentConlang.purposeConcept = await generator.generateConcept(params);
+        setGenerationProgress({ step: 'concept_done', message: `✅ コンセプトが決定しました: ${currentConlang.purposeConcept.slice(0, 50)}...`, percentage: 15 });
+        await updateConlang(currentConlang);
+      }
 
       // 3. 音韻論
-      setGenerationProgress({ step: 'phonology', message: '音韻体系を構築中...', percentage: 30 });
-      currentConlang.phonology = await generator.generatePhonology(params, currentConlang.purposeConcept);
-      await updateConlang(currentConlang);
+      if (!currentConlang.phonology || currentConlang.phonology.phonemes.length === 0) {
+        setGenerationProgress({ step: 'phonology_start', message: '🔊 Linguist: 音韻体系（音素と音節構造）を設計中...', percentage: 25 });
+        currentConlang.phonology = await generator.generatePhonology(params, currentConlang.purposeConcept);
+        setGenerationProgress({ step: 'phonology_done', message: `✅ 音韻体系が構築されました (${currentConlang.phonology.phonemes?.length || 0}音素)`, percentage: 30 });
+        await updateConlang(currentConlang);
+      }
 
       // 4. 形態論
-      setGenerationProgress({ step: 'morphology', message: '形態論を設計中...', percentage: 45 });
-      currentConlang.morphology = await generator.generateMorphology(params, currentConlang.purposeConcept, currentConlang.phonology);
-      await updateConlang(currentConlang);
+      if (!currentConlang.morphology || !currentConlang.morphology.typology) {
+        setGenerationProgress({ step: 'morphology_start', message: '🧩 Linguist: 形態論（語形成規則）を編纂中...', percentage: 40 });
+        currentConlang.morphology = await generator.generateMorphology(params, currentConlang.purposeConcept, currentConlang.phonology);
+        setGenerationProgress({ step: 'morphology_done', message: '✅ 形態論の設計が完了しました。', percentage: 45 });
+        await updateConlang(currentConlang);
+      }
 
       // 5. 統語論
-      setGenerationProgress({ step: 'syntax', message: '統語論を設計中...', percentage: 60 });
-      currentConlang.syntax = await generator.generateSyntax(params, currentConlang.purposeConcept, currentConlang.morphology);
-      await updateConlang(currentConlang);
+      if (!currentConlang.syntax || !currentConlang.syntax.wordOrder) {
+        setGenerationProgress({ step: 'syntax_start', message: '📜 Linguist: 統語論（語順と文構造）を策定中...', percentage: 55 });
+        currentConlang.syntax = await generator.generateSyntax(params, currentConlang.purposeConcept, currentConlang.morphology);
+        setGenerationProgress({ step: 'syntax_done', message: `✅ 統語論が決定しました (基本語順: ${currentConlang.syntax.wordOrder})`, percentage: 60 });
+        await updateConlang(currentConlang);
+      }
 
       // 6. 文字と背景
-      setGenerationProgress({ step: 'culture', message: '文化と歴史を構築中...', percentage: 75 });
-      currentConlang.writingSystem = await generator.generateWritingSystem(params, currentConlang.purposeConcept, currentConlang.phonology);
-      currentConlang.historyBackground = await generator.generateHistory(params, currentConlang.purposeConcept, currentConlang.morphology, currentConlang.syntax);
-      await updateConlang(currentConlang);
+      if (!currentConlang.writingSystem || !currentConlang.writingSystem.name || currentConlang.historyBackground.includes('構築しています')) {
+        setGenerationProgress({ step: 'culture_start', message: '🎨 WorldBuilder: 文字体系と歴史的背景を構築中...', percentage: 70 });
+        currentConlang.writingSystem = await generator.generateWritingSystem(params, currentConlang.purposeConcept, currentConlang.phonology);
+        currentConlang.historyBackground = await generator.generateHistory(params, currentConlang.purposeConcept, currentConlang.morphology, currentConlang.syntax);
+        setGenerationProgress({ step: 'culture_done', message: '✅ 文化背景と文字体系が整いました。', percentage: 80 });
+        await updateConlang(currentConlang);
+      }
 
       // 7. 語彙と例文
-      setGenerationProgress({ step: 'vocabulary', message: '初期語彙と例文を作成中...', percentage: 90 });
-      currentConlang.vocabulary = await generator.generateVocabulary(params, currentConlang.purposeConcept, currentConlang.phonology, currentConlang.morphology, currentConlang.syntax);
-      currentConlang.exampleSentences = await generator.generateExampleSentences(params, currentConlang.vocabulary, currentConlang.morphology, currentConlang.syntax);
+      if (!currentConlang.vocabulary || currentConlang.vocabulary.length === 0) {
+        setGenerationProgress({ step: 'vocabulary_start', message: '📖 Linguist & WorldBuilder: 初期語彙と例文を生成中...', percentage: 85 });
+        currentConlang.vocabulary = await generator.generateVocabulary(params, currentConlang.purposeConcept, currentConlang.phonology, currentConlang.morphology, currentConlang.syntax);
+        currentConlang.exampleSentences = await generator.generateExampleSentences(params, currentConlang.vocabulary, currentConlang.morphology, currentConlang.syntax);
+      }
       
       // 8. 完了
       currentConlang.updatedAt = new Date().toISOString();
       await updateConlang(currentConlang, 'complete');
       
-      setGenerationProgress({ step: 'done', message: '生成が完了しました！', percentage: 100 });
+      setGenerationProgress({ step: 'done', message: '✨ すべての構築プロセスが完了しました！リストから言語を選択して詳細を確認できます。', percentage: 100 });
       return currentConlang;
     } catch (err: any) {
       console.error('Failed to generate conlang:', err);
-      setError(err.message || String(err));
+      const errorMsg = `❌ 生成中にエラーが発生しました: ${err.message || String(err)}`;
+      setError(errorMsg);
+      setGenerationProgress({ step: 'error', message: errorMsg, percentage: 0 });
       return null;
     } finally {
       setIsLoading(false);
       // しばらく進捗を表示してから消す
-      setTimeout(() => setGenerationProgress(null), 3000);
+      setTimeout(() => setGenerationProgress(null), 5000);
     }
   }, [getDriver, initConlang, updateConlang]);
 

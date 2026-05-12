@@ -18,6 +18,22 @@ export class ConlangGenerator {
   }
 
   /**
+   * AIからのレスポンス（Markdownコードブロック等を含む可能性がある）からJSONを安全に抽出します。
+   */
+  private parseResponseJson<T>(content: string): T {
+    // ```json ... ``` または ``` ... ``` を除去
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    const rawJson = jsonMatch ? jsonMatch[1] : content;
+    
+    try {
+      return JSON.parse(rawJson.trim());
+    } catch (e) {
+      console.error('Failed to parse AI response as JSON:', rawJson);
+      throw new Error(`AIの応答をJSONとして解析できませんでした: ${e}`);
+    }
+  }
+
+  /**
    * コンセプトの生成
    */
   async generateConcept(params: GenerationParams): Promise<string> {
@@ -46,7 +62,7 @@ export class ConlangGenerator {
       messages: [{ role: 'user', content: prompt }],
       responseMimeType: 'application/json'
     });
-    return JSON.parse(res.content);
+    return this.parseResponseJson<Phonology>(res.content);
   }
 
   /**
@@ -63,7 +79,7 @@ export class ConlangGenerator {
       messages: [{ role: 'user', content: prompt }],
       responseMimeType: 'application/json'
     });
-    return JSON.parse(res.content);
+    return this.parseResponseJson<Morphology>(res.content);
   }
 
   /**
@@ -80,7 +96,7 @@ export class ConlangGenerator {
       messages: [{ role: 'user', content: prompt }],
       responseMimeType: 'application/json'
     });
-    return JSON.parse(res.content);
+    return this.parseResponseJson<Syntax>(res.content);
   }
 
   /**
@@ -90,14 +106,14 @@ export class ConlangGenerator {
     const prompt = `この言語の文化的背景と音韻体系に基づき、文字体系を提案してください。
     コンセプト: ${concept}
     JSON形式で出力してください。
-    スキーマ: { name: string, type: string, description: string, direction: string }`;
+    スキーマ: { name: string, type: string, description: string, direction: string, sampleText: string }`;
 
     const res = await this.driver.generateText({
       system: WorldBuilderPersona.systemPrompt,
       messages: [{ role: 'user', content: prompt }],
       responseMimeType: 'application/json'
     });
-    return JSON.parse(res.content);
+    return this.parseResponseJson<WritingSystem>(res.content);
   }
 
   /**
@@ -121,7 +137,7 @@ export class ConlangGenerator {
   async generateVocabulary(params: GenerationParams, concept: string, phonology: Phonology, morphology: Morphology, syntax: Syntax): Promise<VocabularyEntry[]> {
     const count = params.numInitialWords || 20;
     const prompt = `これまでの設計に基づき、初期語彙を ${count} 語生成してください。
-    音韻: ${JSON.stringify(phonology.phonemes.map(p => p.symbol))}
+    音韻: ${JSON.stringify(phonology.phonemes?.map(p => p.symbol))}
     JSON形式で出力してください。
     スキーマ: { vocabulary: { id: string, word: string, ipa: string, partOfSpeech: string, meaning: string }[] }`;
 
@@ -130,7 +146,7 @@ export class ConlangGenerator {
       messages: [{ role: 'user', content: prompt }],
       responseMimeType: 'application/json'
     });
-    const data = JSON.parse(res.content);
+    const data = this.parseResponseJson<{ vocabulary: any[] }>(res.content);
     return data.vocabulary.map((v: any) => ({ ...v, id: v.id || crypto.randomUUID() }));
   }
 
@@ -142,14 +158,14 @@ export class ConlangGenerator {
     const prompt = `語彙と文法規則に基づき、例文を ${count} 件生成してください。
     語彙サンプル: ${vocabulary.slice(0, 5).map(v => `${v.word} (${v.meaning})`).join(', ')}
     JSON形式で出力してください。
-    スキーマ: { exampleSentences: { id: string, original: string, translation: string, grammaticalBreakdown: string }[] }`;
+    スキーマ: { sentences: { id: string, original: string, translation: string, ipa: string, grammaticalBreakdown: string }[] }`;
 
     const res = await this.driver.generateText({
       system: LinguistPersona.systemPrompt,
       messages: [{ role: 'user', content: prompt }],
       responseMimeType: 'application/json'
     });
-    const data = JSON.parse(res.content);
-    return data.exampleSentences.map((s: any) => ({ ...s, id: s.id || crypto.randomUUID() }));
+    const data = this.parseResponseJson<{ sentences: any[] }>(res.content);
+    return data.sentences.map((s: any) => ({ ...s, id: s.id || crypto.randomUUID() }));
   }
 }

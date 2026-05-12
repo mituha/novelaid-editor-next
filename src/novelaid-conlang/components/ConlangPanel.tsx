@@ -1,38 +1,76 @@
 import React, { useState } from 'react';
-import { Languages, Plus, Info, Settings, Trash2, RefreshCw } from 'lucide-react';
+import { AiChatInput } from 'restar-ai';
+import { MessageMarkdown } from '../../novelaid-chat/components/MessageMarkdown';
 import { useConlangs } from '../hooks/useConlangs';
 import { Conlang } from '../types';
 import { ConlangCreateModal } from './ConlangCreateModal';
 import { ConlangDetails } from './ConlangDetails';
+import { Bot, User, AlertCircle, Languages, Plus, RefreshCw } from 'lucide-react';
 import './ConlangPanel.css';
 
 export const ConlangPanel: React.FC = () => {
-  const { conlangs, isLoading, error, loadConlangs, generationProgress } = useConlangs();
+  const { conlangs, isLoading, error, loadConlangs, generationProgress, generateConlang } = useConlangs();
   const [selectedLang, setSelectedLang] = useState<Conlang | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
 
-  // 生成中のログを保持（簡易チャット形式）
-  const [generationLogs, setGenerationLogs] = useState<{ id: string; message: string; type: 'info' | 'success' | 'working' }[]>([]);
+  // 生成中・対話用のメッセージリスト
+  const [messages, setMessages] = useState<{ id: string; role: 'assistant' | 'user'; content: string; type?: string; error?: string }[]>([]);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  // 自動スクロール
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   React.useEffect(() => {
     if (generationProgress) {
-      setGenerationLogs(prev => {
+      setMessages(prev => {
         // 同じステップのログがあれば更新、なければ追加
-        const existing = prev.find(l => l.id === generationProgress.step);
-        if (existing) {
-          return prev.map(l => l.id === generationProgress.step ? { ...l, message: generationProgress.message } : l);
+        const existingIdx = prev.findIndex(m => m.id === generationProgress.step);
+        if (existingIdx !== -1) {
+          const newMessages = [...prev];
+          newMessages[existingIdx] = { ...newMessages[existingIdx], content: generationProgress.message };
+          return newMessages;
         }
         return [...prev, { 
           id: generationProgress.step, 
-          message: generationProgress.message, 
-          type: generationProgress.step === 'done' ? 'success' : 'working' 
+          role: 'assistant',
+          content: generationProgress.message,
+          type: generationProgress.step
         }];
       });
-    } else if (!isLoading) {
-      // 生成が終わってしばらくしたらログをクリア（または必要に応じて残す）
-      // setGenerationLogs([]);
     }
-  }, [generationProgress, isLoading]);
+  }, [generationProgress]);
+
+  // エラー表示の同期
+  React.useEffect(() => {
+    if (error) {
+      setMessages(prev => [
+        ...prev, 
+        { id: crypto.randomUUID(), role: 'assistant', content: '', error }
+      ]);
+    }
+  }, [error]);
+
+  const handleSend = () => {
+    if (!inputValue.trim()) return;
+    
+    const userMsg = { id: crypto.randomUUID(), role: 'user' as const, content: inputValue };
+    setMessages(prev => [...prev, userMsg]);
+    setInputValue('');
+    
+    // 将来的なチャット処理のプレースホルダ
+    setTimeout(() => {
+      setMessages(prev => [...prev, { 
+        id: crypto.randomUUID(), 
+        role: 'assistant', 
+        content: '現在、生成後のチャットによる調整機能を準備中です。生成された言語の設定を確認するには、リストから言語を選択してください。' 
+      }]);
+    }, 1000);
+  };
 
   return (
     <div className="novelaid-conlang-panel">
@@ -46,27 +84,35 @@ export const ConlangPanel: React.FC = () => {
         </button>
       </div>
 
-      <div className="conlang-content">
-        {isLoading && generationProgress ? (
-          <div className="conlang-generation-view">
-            <div className="generation-header">
-              <RefreshCw size={20} className="animate-spin" />
-              <span>言語を構築中...</span>
-            </div>
-            <div className="generation-chat">
-              {generationLogs.map(log => (
-                <div key={log.id} className={`chat-bubble ${log.type}`}>
-                  <div className="bubble-icon">
-                    {log.type === 'working' ? <RefreshCw size={14} className="animate-spin" /> : <Plus size={14} />}
+      <div className="conlang-content" ref={scrollRef}>
+        {(isLoading && generationProgress) || messages.length > 0 ? (
+          <div className="conlang-chat-view">
+            <div className="message-list">
+              {messages.map((msg) => (
+                <div key={msg.id} className={`message-item ${msg.role} ${msg.error ? 'error' : ''}`}>
+                  <div className="message-icon">
+                    {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
                   </div>
-                  <div className="bubble-text">{log.message}</div>
+                  <div className="message-content-wrapper">
+                    <div className="message-content">
+                      {msg.error ? (
+                        <div className="error-container">
+                          <AlertCircle size={14} />
+                          <span>{msg.error}</span>
+                        </div>
+                      ) : (
+                        <MessageMarkdown content={msg.content} />
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
-            </div>
-            <div className="generation-footer">
-              <div className="progress-mini">
-                <div className="progress-mini-fill" style={{ width: `${generationProgress.percentage}%` }}></div>
-              </div>
+              {isLoading && generationProgress && (
+                <div className="generation-status-mini">
+                  <RefreshCw size={12} className="animate-spin" />
+                  <span>構築中... ({generationProgress.percentage}%)</span>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -88,13 +134,43 @@ export const ConlangPanel: React.FC = () => {
                   </div>
                   <div className="conlang-info">
                     <div className="conlang-name">{lang.name}</div>
-                    <div className="conlang-summary">{lang.purposeConcept}</div>
+                    <div className="conlang-summary">
+                      {lang.purposeConcept || '未設定'}
+                      {lang.metadata?.status !== 'complete' && (
+                        <span className="status-badge incomplete">未完了</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="conlang-item-actions">
+                    {lang.metadata?.status !== 'complete' && (
+                      <button 
+                        className="action-btn retry" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          generateConlang(lang.generationParams, lang);
+                        }}
+                        title="生成を再開"
+                      >
+                        <RefreshCw size={14} />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
             )}
           </div>
         )}
+      </div>
+
+      <div className="conlang-input-wrapper">
+        <AiChatInput 
+          value={inputValue}
+          onChange={setInputValue}
+          onSend={handleSend}
+          isStreaming={isLoading}
+          disabled={isLoading && !generationProgress}
+          placeholder="AI に言語について相談する..."
+        />
       </div>
 
       {selectedLang && (

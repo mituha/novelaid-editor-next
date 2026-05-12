@@ -63,14 +63,14 @@ export const ConlangDetails: React.FC<ConlangDetailsProps> = ({ conlang, onClose
                   <div>
                     <h4>音素</h4>
                     <ul className="phoneme-list">
-                      {conlang.phonology.phonemes.map((p, i) => (
+                      {conlang.phonology.phonemes?.map((p, i) => (
                         <li key={i}><strong>{p.symbol}</strong> /{p.ipa}/ ({p.type})</li>
                       ))}
                     </ul>
                   </div>
                   <div>
                     <h4>音節構造</h4>
-                    <p>{conlang.phonology.syllableStructures.map(s => s.pattern).join(', ')}</p>
+                    <p>{conlang.phonology.syllableStructures?.map(s => s.pattern).join(', ')}</p>
                   </div>
                 </div>
               </section>
@@ -99,7 +99,7 @@ export const ConlangDetails: React.FC<ConlangDetailsProps> = ({ conlang, onClose
                   </tr>
                 </thead>
                 <tbody>
-                  {conlang.vocabulary.map(v => (
+                  {conlang.vocabulary?.map(v => (
                     <tr key={v.id}>
                       <td><strong>{v.word}</strong></td>
                       <td>/{v.ipa}/</td>
@@ -112,7 +112,7 @@ export const ConlangDetails: React.FC<ConlangDetailsProps> = ({ conlang, onClose
               
               <section className="examples-section">
                 <h3>例文</h3>
-                {conlang.exampleSentences.map(s => (
+                {conlang.exampleSentences?.map(s => (
                   <div key={s.id} className="example-item">
                     <div className="original">{s.original}</div>
                     <div className="translation">{s.translation}</div>

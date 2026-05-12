@@ -14,6 +14,7 @@ import {
 import { AiChatInput } from 'restar-ai';
 import { useAiModule } from '../contexts/AiContext';
 import { useDocument } from '../../contexts/DocumentContext';
+import { AiContextSelector } from './AiContextSelector';
 import { AiMessage } from '../types';
 import './ProofreaderPanel.css';
 
@@ -269,6 +270,9 @@ export const ProofreaderPanel: React.FC = () => {
                     disabled={isGenerating || !content.trim()}
                     placeholder="校正結果について質問する..."
                 />
+                <div className="chat-context-area">
+                    <AiContextSelector />
+                </div>
             </div>
         </div>
     );

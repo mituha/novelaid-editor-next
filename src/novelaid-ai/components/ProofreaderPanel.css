@@ -179,3 +179,8 @@
     border-top: 1px solid var(--border-color);
     background-color: var(--bg-secondary);
 }
+
+.chat-context-area {
+    margin-top: 0.5rem;
+    background-color: var(--bg-primary);
+}

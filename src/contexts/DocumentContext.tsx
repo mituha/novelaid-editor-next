@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { readDocument, writeDocument, NovelaidDocument, NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
 import { DocumentViewMode } from '../types/document';
+import { useProject } from './ProjectContext';
 
 export interface DocumentState {
     path: string;
@@ -67,6 +68,18 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [isSplit, setIsSplit] = useState(false);
     const [activePane, setActivePane] = useState<'left' | 'right'>('left');
     const [splitRatio, setSplitRatio] = useState(0.5);
+
+    const { projectPath } = useProject();
+
+    // プロジェクト変更時にエディターのタブ状態をリセット
+    useEffect(() => {
+        setOpenDocuments([]);
+        setActiveLeftItem(null);
+        setActiveRightItem(null);
+        setIsSplit(false);
+        setActivePane('left');
+        setSplitRatio(0.5);
+    }, [projectPath]);
 
     const activeItem = useMemo(() => {
         return activePane === 'left' ? activeLeftItem : activeRightItem;

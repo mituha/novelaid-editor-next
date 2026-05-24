@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { PanelDefinition, PaneSide, PaneState } from '../types/panel';
 import { Files, Tag, MessageSquare } from 'lucide-react';
 import { FileExplorer } from '../components/FileExplorer';
+import { useProject } from './ProjectContext';
 import { MetadataPanel } from '../components/MetadataPanel';
 import { ChatPanel } from '../novelaid-chat/components/ChatPanel';
 import { ProofreaderPanel } from '../novelaid-ai/components/ProofreaderPanel';
@@ -70,6 +71,22 @@ export const PanelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         isVisible: true,
         width: 300
     });
+
+    const { projectPath } = useProject();
+
+    // プロジェクト変更時にパネル状態をリセット
+    useEffect(() => {
+        setLeftPane({
+            activePanelId: 'explorer',
+            isVisible: true,
+            width: 250
+        });
+        setRightPane({
+            activePanelId: 'metadata',
+            isVisible: true,
+            width: 300
+        });
+    }, [projectPath]);
 
     const registerPanel = useCallback((panel: PanelDefinition) => {
         setPanels(prev => {

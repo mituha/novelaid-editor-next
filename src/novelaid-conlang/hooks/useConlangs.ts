@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { readDirectory, readDocument, writeDocument, createDirectory, NovelaidDocument, getProjectDirectory } from 'tauri-plugin-novelaid-fs-api';
+import { readDirectory, readDocument, writeDocument, createDirectory, NovelaidDocument } from 'tauri-plugin-novelaid-fs-api';
 import { Conlang, GenerationParams } from '../types';
 import { useAiModule } from '../../novelaid-ai/contexts/AiContext';
 import { ConlangGenerator, GenerationProgress } from '../ai/generator';
+import { useProject } from '../../contexts/ProjectContext';
 
 const CONLANG_DIR = '言語';
 
@@ -13,19 +14,26 @@ export const useConlangs = () => {
   const [generationProgress, setGenerationProgress] = useState<GenerationProgress | null>(null);
   
   const { getDriver } = useAiModule();
+  const { projectPath } = useProject();
 
   const getFullDirPath = useCallback(async () => {
-    const projectDir = await getProjectDirectory();
-    if (!projectDir) return null;
-    return `${projectDir}/${CONLANG_DIR}`;
-  }, []);
+    if (!projectPath) return null;
+    return `${projectPath}/${CONLANG_DIR}`;
+  }, [projectPath]);
 
   const loadConlangs = useCallback(async () => {
+    if (!projectPath || projectPath === '未選択') {
+      setConlangs([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
       const dirPath = await getFullDirPath();
-      if (!dirPath) throw new Error('プロジェクトディレクトリが設定されていません');
+      if (!dirPath) return;
 
       try {
         const entries = await readDirectory(dirPath);

@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { AiMessage, AiStreamChunk } from '../../novelaid-ai/types';
 import { useAiModule } from '../../novelaid-ai/contexts/AiContext';
+import { useProject } from '../../contexts/ProjectContext';
 
 interface ChatContextType {
     messages: AiMessage[];
@@ -15,10 +16,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [messages, setMessages] = useState<AiMessage[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const { getDriver, getContextData, activePersona, settings } = useAiModule();
+    const { projectPath } = useProject();
 
     const clearMessages = useCallback(() => {
         setMessages([]);
     }, []);
+
+    // プロジェクト変更時にチャットメッセージをリセット
+    useEffect(() => {
+        clearMessages();
+    }, [projectPath, clearMessages]);
 
     const sendMessage = useCallback(async (text: string) => {
         if (!text.trim() || isGenerating) return;

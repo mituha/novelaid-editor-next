@@ -60,10 +60,16 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
     useEffect(() => {
         if (projectPath && projectPath !== '未選択') {
             setLoading(true);
+            setError(null);
+            setFiles([]); // 古いファイルツリーをクリア
             loadFiles(projectPath)
                 .then(setFiles)
                 .catch(err => setError(err.message))
                 .finally(() => setLoading(false));
+        } else {
+            setFiles([]);
+            setLoading(false);
+            setError(null);
         }
     }, [projectPath]);
 

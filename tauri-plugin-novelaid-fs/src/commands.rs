@@ -56,6 +56,8 @@ fn read_dir_recursive<R: Runtime>(
             };
 
             if needs_scan {
+                use std::sync::atomic::Ordering;
+                novelaid_fs.total_jobs.fetch_add(1, Ordering::SeqCst);
                 let _ = novelaid_fs.queue_tx.send(path_buf.clone());
             }
         }

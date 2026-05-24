@@ -7,12 +7,14 @@ import {
   Maximize,
   Minimize,
   HelpCircle,
+  Loader2,
 } from 'lucide-react';
 import { useDocument } from '../../contexts/DocumentContext';
 import { usePanels } from '../../contexts/PanelContext';
 import { DocumentIcon } from '../DocumentIcon';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { openUrl } from '@tauri-apps/plugin-opener';
+import { listen } from '@tauri-apps/api/event';
 import { countCharacters, DetailedCountResult } from 'novelaid-ruby';
 import './StatusBar.css';
 
@@ -38,6 +40,13 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   const [selectedMetrics, setSelectedMetrics] = useState<DetailedCountResult | null>(null);
   const [showPopup, setShowPopup] = useState(false);
 
+  interface ScanProgress {
+    processed: number;
+    total: number;
+    currentFile: string;
+  }
+  const [scanProgress, setScanProgress] = useState<ScanProgress | null>(null);
+
   const popupRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +66,29 @@ export const StatusBar: React.FC<StatusBarProps> = ({
       }
     };
     checkFullscreen();
+  }, []);
+
+  // メタデータスキャンの進捗を監視
+  useEffect(() => {
+    let unlisten: (() => void) | null = null;
+    const setupListener = async () => {
+      try {
+        unlisten = await listen<ScanProgress>('fs:metadata-scan-progress', (event) => {
+          const { processed, total, currentFile } = event.payload;
+          if (processed >= total) {
+            setScanProgress(null);
+          } else {
+            setScanProgress({ processed, total, currentFile });
+          }
+        });
+      } catch (err) {
+        console.error('進捗イベントの登録に失敗しました:', err);
+      }
+    };
+    setupListener();
+    return () => {
+      if (unlisten) unlisten();
+    };
   }, []);
 
   // 全体の文字数カウント (Debounce: 200ms)
@@ -202,6 +234,15 @@ export const StatusBar: React.FC<StatusBarProps> = ({
                 {docType.charAt(0).toUpperCase() + docType.slice(1)}
               </span>
             )}
+          </div>
+        )}
+
+        {scanProgress && (
+          <div className="status-scan-progress" title={`同期中のファイル: ${scanProgress.currentFile}`}>
+            <Loader2 size={13} className="spin-icon" />
+            <span className="progress-text">
+              同期中... {scanProgress.processed} / {scanProgress.total}
+            </span>
           </div>
         )}
       </div>

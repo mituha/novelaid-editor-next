@@ -6,6 +6,7 @@ import { useProject } from '../contexts/ProjectContext';
 import { useDocument } from '../contexts/DocumentContext';
 import { SplitResizer } from '../components/SplitResizer';
 import { DocumentPane } from '../components/DocumentPane';
+import { StatusBar } from '../components/StatusBar/StatusBar';
 import './MainLayout.css';
 
 export const MainLayout: React.FC = () => {
@@ -36,27 +37,34 @@ export const MainLayout: React.FC = () => {
     }, [navigate]);
 
     return (
-        <div className="main-layout">
-            <SidePane side="left" />
-            
-            <main className={`editor-area ${isSplit ? 'split' : ''}`}>
-                <DocumentPane 
-                    pane="left" 
-                    flex={isSplit ? splitRatio : undefined} 
-                />
+        <div className="main-layout-wrapper">
+            <div className="main-layout">
+                <SidePane side="left" />
                 
-                {isSplit && (
-                    <>
-                        <SplitResizer />
-                        <DocumentPane 
-                            pane="right" 
-                            flex={1 - splitRatio} 
-                        />
-                    </>
-                )}
-            </main>
-            
-            <SidePane side="right" />
+                <main className={`editor-area ${isSplit ? 'split' : ''}`}>
+                    <DocumentPane 
+                        pane="left" 
+                        flex={isSplit ? splitRatio : undefined} 
+                    />
+                    
+                    {isSplit && (
+                        <>
+                            <SplitResizer />
+                            <DocumentPane 
+                                pane="right" 
+                                flex={1 - splitRatio} 
+                            />
+                        </>
+                    )}
+                </main>
+                
+                <SidePane side="right" />
+            </div>
+
+            <StatusBar 
+                onGoHome={() => navigate('/')}
+                onOpenSettings={() => setIsSettingsOpen(true)}
+            />
 
             <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         </div>

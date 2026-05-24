@@ -25,6 +25,12 @@ fn read_dir_recursive(
         let file_type = entry.file_type()?;
         let is_directory = file_type.is_dir();
         let name = entry.file_name().to_string_lossy().to_string();
+
+        // . で始まるフォルダ（ディレクトリ）は除外する（. で始まるファイルは除外しない）
+        if is_directory && name.starts_with('.') {
+            continue;
+        }
+
         let document_type = if is_directory {
             get_directory_type(name.clone(), parent_type)
         } else {

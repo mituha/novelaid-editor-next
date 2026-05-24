@@ -26,3 +26,4 @@ dist-ssr
 .novelaid/*
 
 *.code-workspace
+error.txt

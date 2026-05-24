@@ -109,6 +109,12 @@ impl<R: Runtime> NovelaidFs<R> {
         let entry = entry.map_err(crate::Error::Io)?;
         let path = entry.path();
         if path.is_dir() {
+          // . で始まるフォルダ（ディレクトリ）は除外する
+          if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
+            if name.starts_with('.') {
+              continue;
+            }
+          }
           self.scan_metadata_internal(&path)?;
         } else {
           let doc_type = self.get_document_type_internal(&path);

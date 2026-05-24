@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronRight as ChevronRightIcon, ChevronDown as ChevronDownIcon } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
 import { useProject } from '../contexts/ProjectContext';
 import './FileExplorer.css';
 
 import { DocumentIcon } from './DocumentIcon';
-import { NovelaidDocumentType, readDirectory, NovelaidDirEntry, scanProjectMetadata } from 'tauri-plugin-novelaid-fs-api';
+import { NovelaidDocumentType, readDirectory, NovelaidDirEntry } from 'tauri-plugin-novelaid-fs-api';
 import { rename, copyFile } from '@tauri-apps/plugin-fs';
 import { dirname, join, basename } from '@tauri-apps/api/path';
 
@@ -32,7 +32,8 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
     const [dragOverPath, setDragOverPath] = useState<string | null>(null);
     const { openDocument, activeFilePath } = useDocument();
 
-    const loadFiles = async (path: string, parentType: NovelaidDocumentType = 'novel', recursive = false): Promise<FileNode[]> => {
+    // デフォルトで再帰スキャン（recursive = true）にする
+    const loadFiles = async (path: string, parentType: NovelaidDocumentType = 'novel', recursive = true): Promise<FileNode[]> => {
         try {
             const entries = await readDirectory(path, recursive, parentType);
 
@@ -66,33 +67,23 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
         }
     }, [projectPath]);
 
-    const toggleFolder = async (node: FileNode) => {
+    // 全階層ロードされているため、同期的トグルに変更
+    const toggleFolder = (node: FileNode) => {
         if (!node.isDirectory) return;
 
-        const updateNodesRecursive = async (nodes: FileNode[]): Promise<FileNode[]> => {
-            return Promise.all(nodes.map(async n => {
+        const updateNodesRecursive = (nodes: FileNode[]): FileNode[] => {
+            return nodes.map(n => {
                 if (n.path === node.path) {
-                    const nextOpenState = !n.isOpen;
-                    let children = n.children;
-                    if (nextOpenState && (!children || children.length === 0)) {
-                        try {
-                            const newChildren = await loadFiles(n.path, n.documentType);
-                            children = newChildren;
-                        } catch (e) {
-                            console.error("Failed to load subfolder", e);
-                        }
-                    }
-                    return { ...n, isOpen: nextOpenState, children };
+                    return { ...n, isOpen: !n.isOpen };
                 }
                 if (n.children && n.children.length > 0) {
-                    return { ...n, children: await updateNodesRecursive(n.children) };
+                    return { ...n, children: updateNodesRecursive(n.children) };
                 }
                 return n;
-            }));
+            });
         };
 
-        const newFiles = await updateNodesRecursive(files);
-        setFiles(newFiles);
+        setFiles(updateNodesRecursive(files));
     };
 
 
@@ -124,8 +115,6 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
 
     const handleDragLeave = (e: React.DragEvent) => {
         e.preventDefault();
-        // 親要素に戻った場合などにチラつくのを防ぐため、厳密な判定が必要な場合もあるが
-        // ここでは簡易的に直近の進入パスを保持する
     };
 
     const handleDrop = async (e: React.DragEvent, targetNode?: FileNode) => {
@@ -140,10 +129,8 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
             let destDir: string;
             if (targetNode) {
                 if (sourcePath === targetNode.path) return;
-                // ドロップ先がディレクトリでない場合は、その親ディレクトリをドロップ先とする
                 destDir = targetNode.isDirectory ? targetNode.path : await dirname(targetNode.path);
             } else {
-                // コンテナ（ルート）へのドロップ
                 destDir = projectPath;
             }
 
@@ -153,17 +140,12 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
             if (sourcePath === destPath) return;
 
             if (e.ctrlKey) {
-                // コピー
                 await copyFile(sourcePath, destPath);
             } else {
-                // 移動
                 await rename(sourcePath, destPath);
             }
 
-            // プロジェクトメタデータの再スキャン
-            await scanProjectMetadata();
-
-            // 表示の更新
+            // 表示の更新 (再読込によりバックエンドの非同期キャッシュキューも同期される)
             if (projectPath && projectPath !== '未選択') {
                 const updatedFiles = await loadFiles(projectPath);
                 setFiles(updatedFiles);
@@ -175,7 +157,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ projectPath: propsPr
 
     const renderNode = (node: FileNode, depth = 0) => {
         const isDirectory = node.isDirectory;
-        const ChevronIcon = isDirectory ? (node.isOpen ? ChevronDown : ChevronRight) : null;
+        const ChevronIcon = isDirectory ? (node.isOpen ? ChevronDownIcon : ChevronRightIcon) : null;
 
         return (
             <div key={node.path}>

@@ -204,9 +204,3 @@ pub(crate) async fn get_metadata_cache<R: Runtime>(
     Ok(app.novelaid_fs().get_metadata_cache())
 }
 
-#[command]
-pub(crate) async fn scan_project_metadata<R: Runtime>(
-    app: AppHandle<R>,
-) -> Result<()> {
-    app.novelaid_fs().scan_project_metadata()
-}

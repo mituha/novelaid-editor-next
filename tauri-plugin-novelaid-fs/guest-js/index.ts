@@ -76,6 +76,3 @@ export async function getMetadataCache(): Promise<Record<string, any>> {
   return await invoke<Record<string, any>>('plugin:novelaid-fs|get_metadata_cache');
 }
 
-export async function scanProjectMetadata(): Promise<void> {
-  await invoke('plugin:novelaid-fs|scan_project_metadata');
-}

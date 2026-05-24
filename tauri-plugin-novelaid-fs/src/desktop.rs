@@ -80,16 +80,12 @@ impl<R: Runtime> NovelaidFs<R> {
 
   pub fn set_project_directory(&self, path: Option<PathBuf>) {
     let mut dir = self.project_directory.lock().unwrap();
-    *dir = path.clone();
+    *dir = path;
     
-    // Clear cache and trigger scan if path is set
+    // Clear cache if path is set
     {
       let mut cache = self.metadata_cache.lock().unwrap();
       cache.clear();
-    }
-    
-    if let Some(p) = path {
-      let _ = self.scan_metadata_internal(&p);
     }
   }
 
@@ -155,54 +151,6 @@ impl<R: Runtime> NovelaidFs<R> {
     cache.iter()
         .map(|(k, v)| (k.clone(), v.metadata.clone()))
         .collect()
-  }
-
-  pub fn scan_project_metadata(&self) -> crate::Result<()> {
-    let dir = self.get_project_directory();
-    if let Some(p) = dir {
-      self.scan_metadata_internal(&p)?;
-    }
-    Ok(())
-  }
-
-  fn scan_metadata_internal(&self, path: &Path) -> crate::Result<()> {
-    if path.is_dir() {
-      for entry in std::fs::read_dir(path).map_err(crate::Error::Io)? {
-        let entry = entry.map_err(crate::Error::Io)?;
-        let path = entry.path();
-        if path.is_dir() {
-          // . で始まるフォルダ（ディレクトリ）は除外する
-          if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-            if name.starts_with('.') {
-              continue;
-            }
-          }
-          self.scan_metadata_internal(&path)?;
-        } else {
-          let doc_type = self.get_document_type_internal(&path);
-          if matches!(doc_type, NovelaidDocumentType::Novel | NovelaidDocumentType::Markdown) {
-            // ファイル本文の読み込みとパースは非同期キューに任せる
-            let path_str = path.to_string_lossy().to_string();
-            let file_mtime = std::fs::metadata(&path)
-                .and_then(|m| m.modified())
-                .unwrap_or(SystemTime::now());
-
-            let needs_scan = {
-              let cache = self.metadata_cache.lock().unwrap();
-              match cache.get(&path_str) {
-                Some(entry) => file_mtime > entry.mtime,
-                None => true,
-              }
-            };
-
-            if needs_scan {
-              let _ = self.queue_tx.send(path.clone());
-            }
-          }
-        }
-      }
-    }
-    Ok(())
   }
 
   fn extract_frontmatter<'a>(&self, content: &'a str) -> (serde_json::Value, &'a str) {

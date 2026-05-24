@@ -12,7 +12,8 @@ pub(crate) async fn ping<R: Runtime>(
     app.novelaid_fs().ping(payload)
 }
 
-fn read_dir_recursive(
+fn read_dir_recursive<R: Runtime>(
+    app: &AppHandle<R>,
     path: &std::path::Path,
     recursive: bool,
     parent_type: Option<NovelaidDocumentType>,
@@ -37,12 +38,34 @@ fn read_dir_recursive(
             get_document_type(name.clone())
         };
 
+        // メタデータスキャンが必要なファイル形式である場合、非同期キャッシュ更新判定を行う
+        if !is_directory && matches!(document_type, NovelaidDocumentType::Novel | NovelaidDocumentType::Markdown) {
+            let novelaid_fs = app.novelaid_fs();
+            let path_str = path_buf.to_string_lossy().to_string();
+            
+            let file_mtime = std::fs::metadata(&path_buf)
+                .and_then(|m| m.modified())
+                .unwrap_or(std::time::SystemTime::now());
+
+            let needs_scan = {
+                let cache = novelaid_fs.metadata_cache.lock().unwrap();
+                match cache.get(&path_str) {
+                    Some(entry) => file_mtime > entry.mtime,
+                    None => true,
+                }
+            };
+
+            if needs_scan {
+                let _ = novelaid_fs.queue_tx.send(path_buf.clone());
+            }
+        }
+
         let path = path_buf.to_string_lossy().to_string();
         let base_name = path_buf.file_name().unwrap_or_default().to_string_lossy().to_string();
         let file_title = path_buf.file_stem().unwrap_or_default().to_string_lossy().to_string();
 
         let children = if is_directory && recursive {
-            Some(read_dir_recursive(&path_buf, true, Some(document_type))?)
+            Some(read_dir_recursive(app, &path_buf, true, Some(document_type))?)
         } else {
             None
         };
@@ -71,13 +94,14 @@ fn read_dir_recursive(
 }
 
 #[command]
-pub(crate) async fn read_directory(
+pub(crate) async fn read_directory<R: Runtime>(
+    app: AppHandle<R>,
     path: String,
     recursive: bool,
     parent_type: Option<NovelaidDocumentType>,
 ) -> Result<Vec<NovelaidDirEntry>> {
     tauri::async_runtime::spawn_blocking(move || {
-        read_dir_recursive(std::path::Path::new(&path), recursive, parent_type)
+        read_dir_recursive(&app, std::path::Path::new(&path), recursive, parent_type)
     })
     .await
     .unwrap_or_else(|e| Err(std::io::Error::new(std::io::ErrorKind::Other, e.to_string())))

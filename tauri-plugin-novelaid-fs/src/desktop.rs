@@ -1,17 +1,64 @@
-use std::{path::{Path, PathBuf}, sync::Mutex, collections::HashMap};
+use std::{path::{Path, PathBuf}, sync::Mutex, collections::HashMap, sync::Arc, time::SystemTime};
 use serde::de::DeserializeOwned;
-use tauri::{plugin::PluginApi, AppHandle, Runtime};
+use tauri::{plugin::PluginApi, AppHandle, Runtime, Emitter};
 
 use crate::models::*;
+
+#[derive(Debug, Clone)]
+pub struct CacheEntry {
+    pub metadata: serde_json::Value,
+    pub mtime: SystemTime,
+}
 
 pub fn init<R: Runtime, C: DeserializeOwned>(
   app: &AppHandle<R>,
   _api: PluginApi<R, C>,
 ) -> crate::Result<NovelaidFs<R>> {
+  let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<PathBuf>();
+  let metadata_cache = Arc::new(Mutex::new(HashMap::new()));
+
+  // バックグラウンド・メタデータスキャンワーカーの起動
+  let app_clone = app.clone();
+  let cache_clone = Arc::clone(&metadata_cache);
+  tauri::async_runtime::spawn(async move {
+    while let Some(path) = rx.recv().await {
+      let path_str = path.to_string_lossy().to_string();
+
+      if let Ok(content) = std::fs::read_to_string(&path) {
+        let (metadata, _) = extract_frontmatter_static(&content);
+        let mtime = std::fs::metadata(&path)
+            .and_then(|m| m.modified())
+            .unwrap_or_else(|_| SystemTime::now());
+
+        {
+          let mut cache = cache_clone.lock().unwrap();
+          cache.insert(path_str.clone(), CacheEntry {
+              metadata: metadata.clone(),
+              mtime,
+          });
+        }
+
+        // フロントエンドにメタデータ更新イベントを通知
+        #[derive(Clone, serde::Serialize)]
+        #[serde(rename_all = "camelCase")]
+        struct MetadataUpdatedPayload {
+            path: String,
+            metadata: serde_json::Value,
+        }
+
+        let _ = app_clone.emit("fs:metadata-updated", MetadataUpdatedPayload {
+            path: path_str,
+            metadata,
+        });
+      }
+    }
+  });
+
   Ok(NovelaidFs {
     app: app.clone(),
     project_directory: Mutex::new(None),
-    metadata_cache: Mutex::new(HashMap::new()),
+    metadata_cache,
+    queue_tx: tx,
   })
 }
 
@@ -20,7 +67,8 @@ pub struct NovelaidFs<R: Runtime> {
   #[allow(dead_code)]
   app: AppHandle<R>,
   project_directory: Mutex<Option<PathBuf>>,
-  metadata_cache: Mutex<HashMap<String, serde_json::Value>>,
+  pub metadata_cache: Arc<Mutex<HashMap<String, CacheEntry>>>,
+  pub queue_tx: tokio::sync::mpsc::UnboundedSender<PathBuf>,
 }
 
 impl<R: Runtime> NovelaidFs<R> {
@@ -59,7 +107,13 @@ impl<R: Runtime> NovelaidFs<R> {
     // Update cache
     {
       let mut cache = self.metadata_cache.lock().unwrap();
-      cache.insert(path.to_string_lossy().to_string(), metadata.clone());
+      let mtime = std::fs::metadata(path)
+          .and_then(|m| m.modified())
+          .unwrap_or_else(|_| SystemTime::now());
+      cache.insert(path.to_string_lossy().to_string(), CacheEntry {
+          metadata: metadata.clone(),
+          mtime,
+      });
     }
 
     Ok(NovelaidDocument {
@@ -79,7 +133,13 @@ impl<R: Runtime> NovelaidFs<R> {
     // Update cache
     {
       let mut cache = self.metadata_cache.lock().unwrap();
-      cache.insert(path.to_string_lossy().to_string(), document.metadata);
+      let mtime = std::fs::metadata(path)
+          .and_then(|m| m.modified())
+          .unwrap_or_else(|_| SystemTime::now());
+      cache.insert(path.to_string_lossy().to_string(), CacheEntry {
+          metadata: document.metadata,
+          mtime,
+      });
     }
     
     Ok(())
@@ -92,7 +152,9 @@ impl<R: Runtime> NovelaidFs<R> {
 
   pub fn get_metadata_cache(&self) -> HashMap<String, serde_json::Value> {
     let cache = self.metadata_cache.lock().unwrap();
-    cache.clone()
+    cache.iter()
+        .map(|(k, v)| (k.clone(), v.metadata.clone()))
+        .collect()
   }
 
   pub fn scan_project_metadata(&self) -> crate::Result<()> {
@@ -119,7 +181,23 @@ impl<R: Runtime> NovelaidFs<R> {
         } else {
           let doc_type = self.get_document_type_internal(&path);
           if matches!(doc_type, NovelaidDocumentType::Novel | NovelaidDocumentType::Markdown) {
-            let _ = self.read_document(&path); // This will update the cache
+            // ファイル本文の読み込みとパースは非同期キューに任せる
+            let path_str = path.to_string_lossy().to_string();
+            let file_mtime = std::fs::metadata(&path)
+                .and_then(|m| m.modified())
+                .unwrap_or(SystemTime::now());
+
+            let needs_scan = {
+              let cache = self.metadata_cache.lock().unwrap();
+              match cache.get(&path_str) {
+                Some(entry) => file_mtime > entry.mtime,
+                None => true,
+              }
+            };
+
+            if needs_scan {
+              let _ = self.queue_tx.send(path.clone());
+            }
           }
         }
       }
@@ -128,25 +206,7 @@ impl<R: Runtime> NovelaidFs<R> {
   }
 
   fn extract_frontmatter<'a>(&self, content: &'a str) -> (serde_json::Value, &'a str) {
-    if !content.starts_with("---\n") && !content.starts_with("---\r\n") {
-      return (serde_json::json!({}), content);
-    }
-
-    let splitter = if content.contains("\r\n") { "\r\n" } else { "\n" };
-    let fence = format!("---{}", splitter);
-    
-    let parts: Vec<&str> = content.splitn(3, &fence).collect();
-    if parts.len() < 3 {
-      return (serde_json::json!({}), content);
-    }
-
-    let yaml_str = parts[1];
-    let body = parts[2];
-
-    match serde_yaml::from_str::<serde_json::Value>(yaml_str) {
-      Ok(metadata) => (metadata, body),
-      Err(_) => (serde_json::json!({}), content),
-    }
+    extract_frontmatter_static(content)
   }
 
   fn format_frontmatter(&self, metadata: &serde_json::Value, content: &str) -> String {
@@ -179,5 +239,28 @@ impl<R: Runtime> NovelaidFs<R> {
         "css" => NovelaidDocumentType::Css,
         _ => NovelaidDocumentType::Unknown,
     }
+  }
+}
+
+// バックグラウンドワーカーから self なしで呼び出せる静的フロントマター抽出ヘルパー
+fn extract_frontmatter_static(content: &str) -> (serde_json::Value, &str) {
+  if !content.starts_with("---\n") && !content.starts_with("---\r\n") {
+    return (serde_json::json!({}), content);
+  }
+
+  let splitter = if content.contains("\r\n") { "\r\n" } else { "\n" };
+  let fence = format!("---{}", splitter);
+  
+  let parts: Vec<&str> = content.splitn(3, &fence).collect();
+  if parts.len() < 3 {
+    return (serde_json::json!({}), content);
+  }
+
+  let yaml_str = parts[1];
+  let body = parts[2];
+
+  match serde_yaml::from_str::<serde_json::Value>(yaml_str) {
+    Ok(metadata) => (metadata, body),
+    Err(_) => (serde_json::json!({}), content),
   }
 }

@@ -82,3 +82,171 @@
   letter-spacing: 0.5px;
   font-weight: 600;
 }
+
+/* 文字数カウント表示 */
+.char-count-trigger {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 0 10px;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.char-count-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.metric-item {
+  margin-right: 8px;
+}
+
+.metric-item.highlight {
+  color: var(--accent-color, #ff69b4);
+  font-weight: bold;
+}
+
+/* 文字数詳細ポップアップ */
+.char-count-popup {
+  position: absolute;
+  bottom: 34px;
+  right: 12px;
+  width: 320px;
+  background-color: var(--bg-secondary);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  padding: 16px;
+  z-index: 1000;
+  color: var(--text-primary);
+  font-family: inherit;
+  animation: popupFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+}
+
+@keyframes popupFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.popup-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.popup-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 0 4px;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.popup-close-btn:hover {
+  opacity: 1;
+}
+
+.popup-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.popup-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.section-title {
+  font-size: 10px;
+  font-weight: bold;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.popup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.popup-table td {
+  padding: 4px 0;
+  border: none;
+}
+
+.col-label {
+  text-align: left;
+  opacity: 0.8;
+  color: var(--text-secondary);
+}
+
+.col-value {
+  text-align: right;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* 文体分析 比率バー */
+.ratio-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ratio-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.ratio-dialogue {
+  background-color: #4fc3f7;
+  transition: width 0.3s ease;
+}
+
+.ratio-narrative {
+  background-color: #81c784;
+  transition: width 0.3s ease;
+}
+
+.ratio-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+}
+
+.label-dialogue {
+  color: #4fc3f7;
+}
+
+.label-narrative {
+  color: #81c784;
+}

@@ -103,6 +103,23 @@ export const Editor: React.FC<EditorProps> = ({ pane }) => {
         editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
             saveFileRef.current();
         });
+
+        // 選択範囲が変更された際、カスタムイベントを発火する
+        editor.onDidChangeCursorSelection((e) => {
+            const selection = editor.getSelection();
+            if (selection) {
+                const model = editor.getModel();
+                const selectedText = model ? model.getValueInRange(selection) : '';
+                
+                const customEvent = new CustomEvent('editor-selection-change', {
+                    detail: {
+                        text: selectedText,
+                        path: activeFilePath
+                    }
+                });
+                window.dispatchEvent(customEvent);
+            }
+        });
     };
 
     // novel言語の登録と定義

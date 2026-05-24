@@ -5,10 +5,12 @@ import { Settings2, Book } from 'lucide-react';
 import { ProjectLauncher as LibProjectLauncher } from 'restar-app';
 import { SettingsModal } from '../components/SettingsModal';
 import { useApp } from '../contexts/AppContext';
+import { useProject } from '../contexts/ProjectContext';
 
 export const ProjectLauncher: React.FC = () => {
   const navigate = useNavigate();
   const { session, addRecentProject, removeRecentProject, config } = useApp();
+  const { projectPath } = useProject();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleOpenProject = async (path: string) => {
@@ -70,6 +72,8 @@ export const ProjectLauncher: React.FC = () => {
         onOpenProject={handleOpenProject}
         onPickDirectory={handlePickDirectory}
         onRemoveRecent={removeRecentProject}
+        isBackEnabled={!!projectPath}
+        onBack={() => navigate('/editor', { state: { projectPath } })}
       />
 
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />

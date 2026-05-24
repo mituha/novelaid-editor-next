@@ -25,16 +25,7 @@ export const MainLayout: React.FC = () => {
         }
     }, [currentPath, setProjectPath]);
 
-    // Hacks for global UI actions from ActivityBar
-    useEffect(() => {
-        (window as any).onSettingsClick = () => setIsSettingsOpen(true);
-        (window as any).onLauncherClick = () => navigate('/');
-        
-        return () => {
-            delete (window as any).onSettingsClick;
-            delete (window as any).onLauncherClick;
-        };
-    }, [navigate]);
+
 
     return (
         <div className="main-layout-wrapper">

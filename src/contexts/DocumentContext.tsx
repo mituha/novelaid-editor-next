@@ -33,6 +33,8 @@ interface DocumentContextType {
 
     openDocument: (path: string, pane?: 'left' | 'right', asPreview?: boolean) => Promise<void>;
     closeDocument: (path: string, pane: 'left' | 'right', isPreview: boolean) => void;
+    closeOtherDocuments: (path: string, pane: 'left' | 'right', isPreview: boolean) => void;
+    closeAllDocuments: (pane: 'left' | 'right') => void;
     switchDocument: (path: string, pane: 'left' | 'right', isPreview: boolean) => void;
     saveDocument: (path?: string) => Promise<void>;
     setContent: (content: string, path?: string) => void;
@@ -198,6 +200,79 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
     }, [activeLeftItem, activeRightItem]);
 
+    const closeOtherDocuments = useCallback((path: string, pane: 'left' | 'right', isPreview: boolean) => {
+        setOpenDocuments(prev => {
+            return prev.map(doc => {
+                const newDoc = { ...doc };
+                if (pane === 'left') {
+                    if (isPreview) {
+                        if (newDoc.path !== path) {
+                            newDoc.leftPreviewView = 'none';
+                        }
+                        newDoc.leftMainView = 'none';
+                    } else {
+                        if (newDoc.path !== path) {
+                            newDoc.leftMainView = 'none';
+                        }
+                        newDoc.leftPreviewView = 'none';
+                    }
+                } else {
+                    if (isPreview) {
+                        if (newDoc.path !== path) {
+                            newDoc.rightPreviewView = 'none';
+                        }
+                        newDoc.rightMainView = 'none';
+                    } else {
+                        if (newDoc.path !== path) {
+                            newDoc.rightMainView = 'none';
+                        }
+                        newDoc.rightPreviewView = 'none';
+                    }
+                }
+                return newDoc;
+            }).filter(doc =>
+                doc.leftMainView !== 'none' ||
+                doc.rightMainView !== 'none' ||
+                doc.leftPreviewView !== 'none' ||
+                doc.rightPreviewView !== 'none'
+            );
+        });
+
+        const activeItem = { path, isPreview };
+        if (pane === 'left') {
+            setActiveLeftItem(activeItem);
+        } else {
+            setActiveRightItem(activeItem);
+        }
+    }, []);
+
+    const closeAllDocuments = useCallback((pane: 'left' | 'right') => {
+        setOpenDocuments(prev => {
+            return prev.map(doc => {
+                const newDoc = { ...doc };
+                if (pane === 'left') {
+                    newDoc.leftMainView = 'none';
+                    newDoc.leftPreviewView = 'none';
+                } else {
+                    newDoc.rightMainView = 'none';
+                    newDoc.rightPreviewView = 'none';
+                }
+                return newDoc;
+            }).filter(doc =>
+                doc.leftMainView !== 'none' ||
+                doc.rightMainView !== 'none' ||
+                doc.leftPreviewView !== 'none' ||
+                doc.rightPreviewView !== 'none'
+            );
+        });
+
+        if (pane === 'left') {
+            setActiveLeftItem(null);
+        } else {
+            setActiveRightItem(null);
+        }
+    }, []);
+
     const switchDocument = useCallback((path: string, pane: 'left' | 'right', isPreview: boolean) => {
         const newItem = { path, isPreview };
         if (pane === 'left') {
@@ -307,6 +382,8 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         activePane,
         openDocument,
         closeDocument,
+        closeOtherDocuments,
+        closeAllDocuments,
         switchDocument,
         saveDocument,
         setContent,

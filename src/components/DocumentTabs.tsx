@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Columns2, Eye } from 'lucide-react';
 import { useDocument } from '../contexts/DocumentContext';
 import { DocumentIcon } from './DocumentIcon';
+import { ContextMenu, ContextMenuItem } from './ContextMenu';
 import './DocumentTabs.css';
 
 interface DocumentTabsProps {
@@ -15,12 +16,42 @@ export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
         activeRightItem,
         switchDocument, 
         closeDocument, 
+        closeOtherDocuments,
+        closeAllDocuments,
         toggleSplit,
         isSplit,
         activePane,
         setActivePane,
         openDocument
     } = useDocument();
+
+    const [contextMenu, setContextMenu] = useState<{ x: number; y: number; items: ContextMenuItem[] } | null>(null);
+
+    const handleContextMenu = (e: React.MouseEvent, item: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const menuItems: ContextMenuItem[] = [
+            {
+                label: '閉じる',
+                onClick: () => closeDocument(item.path, pane, item.isPreview)
+            },
+            {
+                label: 'その他を閉じる',
+                onClick: () => closeOtherDocuments(item.path, pane, item.isPreview)
+            },
+            {
+                label: 'すべて閉じる',
+                onClick: () => closeAllDocuments(pane)
+            }
+        ];
+
+        setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            items: menuItems
+        });
+    };
 
     const activeItem = pane === 'left' ? activeLeftItem : activeRightItem;
     
@@ -72,6 +103,7 @@ export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
                                 switchDocument(item.path, pane, item.isPreview);
                                 setActivePane(pane);
                             }}
+                            onContextMenu={(e) => handleContextMenu(e, item)}
                             title={item.path}
                         >
                             <DocumentIcon
@@ -130,6 +162,14 @@ export const DocumentTabs: React.FC<DocumentTabsProps> = ({ pane }) => {
                     </button>
                 )}
             </div>
+            {contextMenu && (
+                <ContextMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    items={contextMenu.items}
+                    onClose={() => setContextMenu(null)}
+                />
+            )}
         </div>
     );
 };

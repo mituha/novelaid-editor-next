@@ -34,6 +34,11 @@ export interface ProjectConfig {
 
 export interface ProjectSettings {
     // Project-specific user settings
+    metadataLists?: {
+        id: string;
+        title: string;
+        tag: string;
+    }[];
 }
 
 export interface ProjectSession {

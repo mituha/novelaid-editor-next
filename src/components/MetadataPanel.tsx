@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDocument } from '../contexts/DocumentContext';
-import { Tag, User, Book, Plus, X, List } from 'lucide-react';
+import { Tag, User, Book, Plus, X, List, MapPin, ScrollText } from 'lucide-react';
 import './MetadataPanel.css';
 
 export const MetadataPanel: React.FC = () => {
@@ -40,6 +40,59 @@ export const MetadataPanel: React.FC = () => {
         }
     };
 
+    const tagGroups = [
+        {
+            id: 'character',
+            label: '登場人物',
+            icon: <User size={12} />,
+            tags: ['character', '登場人物', '人名', '人物', 'chara'],
+            primary: 'character',
+        },
+        {
+            id: 'location',
+            label: '地名・施設',
+            icon: <MapPin size={12} />,
+            tags: ['location', 'places', '地名', '施設', '場所', 'place', 'geo', 'geography'],
+            primary: 'location',
+        },
+        {
+            id: 'plot',
+            label: 'プロット',
+            icon: <ScrollText size={12} />,
+            tags: ['plot', '構成', 'プロット', '案', 'timeline', '時間軸', '年表'],
+            primary: 'plot',
+        },
+    ];
+
+    const toggleTagGroup = (groupId: string) => {
+        const group = tagGroups.find((g) => g.id === groupId);
+        if (!group) return;
+
+        const currentTags: string[] = Array.isArray(localMetadata.tags)
+            ? localMetadata.tags
+            : typeof localMetadata.tags === 'string'
+            ? (localMetadata.tags as string).split(',').map(s => s.trim()).filter(Boolean)
+            : [];
+
+        const hasAny = group.tags.some((t) =>
+            currentTags.some((ct) => ct.toLowerCase() === t.toLowerCase())
+        );
+        let newTags: string[];
+
+        if (hasAny) {
+            // Remove all tags associated with this group (case-insensitive)
+            const groupLower = group.tags.map((t) => t.toLowerCase());
+            newTags = currentTags.filter(
+                (t) => !groupLower.includes(t.toLowerCase())
+            );
+        } else {
+            // Add primary tag
+            newTags = [...currentTags, group.primary];
+        }
+
+        handleChange('tags', newTags);
+    };
+
     const commonFields = [
         { key: 'title', label: 'タイトル', icon: <Book size={16} /> },
         { key: 'author', label: '著者', icon: <User size={16} /> },
@@ -55,12 +108,38 @@ export const MetadataPanel: React.FC = () => {
         const value = localMetadata[field.key];
         if (field.isArray) {
             return (
-                <input
-                    type="text"
-                    value={Array.isArray(value) ? value.join(', ') : (value || '')}
-                    onChange={(e) => handleChange(field.key, e.target.value.split(',').map(s => s.trim()))}
-                    placeholder="タグをカンマ区切りで入力"
-                />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className="tag-toggle-buttons">
+                        {tagGroups.map((group) => {
+                            const currentTags: string[] = Array.isArray(value)
+                                ? value
+                                : typeof value === 'string'
+                                ? (value as string).split(',').map(s => s.trim()).filter(Boolean)
+                                : [];
+                            const isActive = group.tags.some((t) =>
+                                currentTags.some((ct) => ct.toLowerCase() === t.toLowerCase())
+                            );
+                            return (
+                                <button
+                                    key={group.id}
+                                    type="button"
+                                    className={`tag-toggle-btn ${isActive ? 'active' : ''}`}
+                                    onClick={() => toggleTagGroup(group.id)}
+                                    title={group.label}
+                                >
+                                    {group.icon}
+                                    <span>{group.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <input
+                        type="text"
+                        value={Array.isArray(value) ? value.join(', ') : (value || '')}
+                        onChange={(e) => handleChange(field.key, e.target.value.split(',').map(s => s.trim()))}
+                        placeholder="タグをカンマ区切りで入力"
+                    />
+                </div>
             );
         }
         if (field.key === 'description') {
@@ -80,6 +159,7 @@ export const MetadataPanel: React.FC = () => {
             />
         );
     };
+
 
     return (
         <div className="metadata-panel">

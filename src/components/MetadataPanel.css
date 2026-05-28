@@ -150,3 +150,38 @@
     font-family: monospace;
     opacity: 0.8;
 }
+
+/* Quick tag toggles */
+.tag-toggle-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 2px;
+}
+
+.tag-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background-color: var(--input-bg, #3c3c3c);
+    border: 1px solid var(--border-color, #444);
+    color: var(--text-dim, #888);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s ease;
+}
+
+.tag-toggle-btn:hover {
+    color: var(--text-main, #eee);
+    border-color: var(--text-dim, #666);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tag-toggle-btn.active {
+    color: #fff;
+    background-color: var(--accent-color, #007acc);
+    border-color: var(--accent-color, #007acc);
+}
+

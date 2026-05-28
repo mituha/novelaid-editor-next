@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { PanelDefinition, PaneSide, PaneState } from '../types/panel';
-import { Files, Tag, MessageSquare } from 'lucide-react';
+import { Files, Tag, MessageSquare, SearchCheck, Languages, User, MapPin, ScrollText, Database } from 'lucide-react';
 import { FileExplorer } from '../components/FileExplorer';
 import { useProject } from './ProjectContext';
 import { MetadataPanel } from '../components/MetadataPanel';
+import { MetadataListPanel } from '../components/MetadataListPanel';
 import { ChatPanel } from '../novelaid-chat/components/ChatPanel';
 import { ProofreaderPanel } from '../novelaid-ai/components/ProofreaderPanel';
 import { ConlangPanel } from '../novelaid-conlang/components/ConlangPanel';
-import { SearchCheck, Languages } from 'lucide-react';
 
 interface PanelContextType {
     panels: PanelDefinition[];
@@ -28,6 +28,34 @@ export const PanelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             title: 'エクスプローラー',
             icon: <Files size={20} />,
             component: FileExplorer,
+            defaultSide: 'left'
+        },
+        {
+            id: 'characters',
+            title: '登場人物',
+            icon: <User size={20} />,
+            component: () => <MetadataListPanel fixedTitle="登場人物一覧" fixedTag="character" />,
+            defaultSide: 'left'
+        },
+        {
+            id: 'locations',
+            title: '地名',
+            icon: <MapPin size={20} />,
+            component: () => <MetadataListPanel fixedTitle="地名一覧" fixedTag="location" />,
+            defaultSide: 'left'
+        },
+        {
+            id: 'plots',
+            title: 'プロット',
+            icon: <ScrollText size={20} />,
+            component: () => <MetadataListPanel fixedTitle="プロット一覧" fixedTag="plot" />,
+            defaultSide: 'left'
+        },
+        {
+            id: 'metadata-list',
+            title: 'メタデータ一覧',
+            icon: <Database size={20} />,
+            component: MetadataListPanel,
             defaultSide: 'left'
         },
         {

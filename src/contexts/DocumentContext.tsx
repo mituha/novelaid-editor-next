@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { readDocument, writeDocument, NovelaidDocument, NovelaidDocumentType } from 'tauri-plugin-novelaid-fs-api';
+import { invoke } from '@tauri-apps/api/core';
 import { DocumentViewMode } from '../types/document';
 import { useProject } from './ProjectContext';
 
@@ -101,9 +102,25 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // If already open anywhere, update flags
         const existingDoc = openDocuments.find(doc => doc.path === path);
         if (existingDoc) {
+            let updatedContent = existingDoc.content;
+            if (path.startsWith('gitDiff://')) {
+                const parts = path.replace('gitDiff://', '').split('/');
+                const staged = parts[0] === 'staged';
+                const filePath = parts.slice(1).join('/');
+                try {
+                    updatedContent = await invoke<string>('git_diff', { dir: projectPath, path: filePath, staged });
+                } catch (err) {
+                    console.error('Failed to load git diff:', err);
+                }
+            }
+
             setOpenDocuments(prev => prev.map(doc =>
                 doc.path === path
-                    ? { ...doc, [viewProp]: doc[viewProp] === 'none' ? defaultView : doc[viewProp] }
+                    ? { 
+                        ...doc, 
+                        content: updatedContent,
+                        [viewProp]: doc[viewProp] === 'none' ? defaultView : doc[viewProp] 
+                      }
                     : doc
             ));
 
@@ -118,22 +135,54 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
 
         try {
-            const doc = await readDocument(path);
-            
-            const newState: DocumentState = {
-                path: doc.path,
-                baseName: doc.baseName,
-                fileTitle: doc.fileTitle,
-                content: doc.content,
-                metadata: doc.metadata || {},
-                documentType: doc.documentType,
-                isDirty: false,
-                leftMainView: 'none',
-                rightMainView: 'none',
-                leftPreviewView: 'none',
-                rightPreviewView: 'none',
-                [viewProp]: defaultView
-            };
+            let newState: DocumentState;
+
+            if (path.startsWith('gitDiff://')) {
+                const parts = path.replace('gitDiff://', '').split('/');
+                const staged = parts[0] === 'staged';
+                const filePath = parts.slice(1).join('/');
+                const baseName = `Diff: ${filePath.split('/').pop() || 'Untitled'} (${staged ? 'ステージ済み' : '変更'})`;
+                
+                let content = '';
+                try {
+                    content = await invoke<string>('git_diff', { dir: projectPath, path: filePath, staged });
+                } catch (err) {
+                    console.error('Failed to load git diff:', err);
+                    content = 'Error loading diff';
+                }
+
+                newState = {
+                    path,
+                    baseName,
+                    fileTitle: baseName,
+                    content,
+                    metadata: {},
+                    documentType: 'gitDiff' as NovelaidDocumentType,
+                    isDirty: false,
+                    leftMainView: 'none',
+                    rightMainView: 'none',
+                    leftPreviewView: 'none',
+                    rightPreviewView: 'none',
+                    [viewProp]: defaultView
+                };
+            } else {
+                const doc = await readDocument(path);
+                newState = {
+                    path: doc.path,
+                    baseName: doc.baseName,
+                    fileTitle: doc.fileTitle,
+                    content: doc.content,
+                    metadata: doc.metadata || {},
+                    documentType: doc.documentType,
+                    isDirty: false,
+                    leftMainView: 'none',
+                    rightMainView: 'none',
+                    leftPreviewView: 'none',
+                    rightPreviewView: 'none',
+                    [viewProp]: defaultView
+                };
+            }
+
             setOpenDocuments(prev => [...prev, newState]);
 
             const newItem = { path, isPreview: asPreview };
@@ -146,7 +195,7 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         } catch (error) {
             console.error('Failed to open document:', error);
         }
-    }, [openDocuments, activePane]);
+    }, [openDocuments, activePane, projectPath]);
 
     const closeDocument = useCallback((path: string, pane: 'left' | 'right', isPreview: boolean) => {
         const viewProp = isPreview

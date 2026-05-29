@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { PanelDefinition, PaneSide, PaneState } from '../types/panel';
-import { Files, Tag, MessageSquare, SearchCheck, Languages, User, MapPin, ScrollText, Database } from 'lucide-react';
+import { Files, Tag, MessageSquare, SearchCheck, Languages, User, MapPin, ScrollText, Database, GitBranch } from 'lucide-react';
 import { FileExplorer } from '../components/FileExplorer';
 import { useProject } from './ProjectContext';
 import { MetadataPanel } from '../components/MetadataPanel';
@@ -8,6 +8,8 @@ import { MetadataListPanel } from '../components/MetadataListPanel';
 import { ChatPanel } from '../novelaid-chat/components/ChatPanel';
 import { ProofreaderPanel } from '../novelaid-ai/components/ProofreaderPanel';
 import { ConlangPanel } from '../novelaid-conlang/components/ConlangPanel';
+import { GitPanelWrapper } from '../components/GitPanelWrapper';
+
 
 interface PanelContextType {
     panels: PanelDefinition[];
@@ -28,6 +30,13 @@ export const PanelProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             title: 'エクスプローラー',
             icon: <Files size={20} />,
             component: FileExplorer,
+            defaultSide: 'left'
+        },
+        {
+            id: 'git',
+            title: '書庫管理',
+            icon: <GitBranch size={20} />,
+            component: GitPanelWrapper,
             defaultSide: 'left'
         },
         {

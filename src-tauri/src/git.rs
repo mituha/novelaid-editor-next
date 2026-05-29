@@ -21,8 +21,11 @@ pub struct GitLogEntry {
 }
 
 fn run_git_cmd(dir: &str, args: &[&str]) -> Result<String, String> {
+    let mut final_args = vec!["-c", "core.quotepath=false"];
+    final_args.extend_from_slice(args);
+
     let output = Command::new("git")
-        .args(args)
+        .args(&final_args)
         .current_dir(dir)
         .output()
         .map_err(|e| format!("Gitコマンドの実行に失敗しました: {}", e))?;

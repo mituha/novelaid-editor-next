@@ -3,6 +3,9 @@
 小説執筆用アプリ、`novelaid-editor`のTauri再実装バージョン。
 移植ではなく、再実装なので、中身は異なります。
 
+再々実装バージョンがこのアプリより先に進んだので、こっち(`novelaid-editor-next`)は開発終了です。
+`noveliade`( https://github.com/mituha/novelaide )の方をチェックしてください。
+
 https://mituha.github.io/novelaid-editor-docs/
 
 ## 開発環境
